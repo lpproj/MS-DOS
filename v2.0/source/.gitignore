@@ -16,6 +16,8 @@
 *.exe
 *.ERR
 *.err
+*.HST
+*.hst
 *.OBJ
 *.obj
 #*.OVR
@@ -26,6 +28,8 @@
 *.lst
 *.MAP
 *.map
+*.PRF
+*.prf
 *.SYM
 *.sym
 
