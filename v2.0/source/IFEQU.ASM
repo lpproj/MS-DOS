@@ -16,3 +16,4 @@ IF1
         %OUT Kanji version
     ENDIF
 ENDIF
+

@@ -31,3 +31,4 @@ ASWITCH EQU     4               ; ASCII mode during COPY
 BSWITCH EQU     8               ; Binary mode during COPY
 VSWITCH EQU     10H             ; Verify switch
 GOTSWITCH EQU   8000H           ; Meta switch set if switch character encountered
+
