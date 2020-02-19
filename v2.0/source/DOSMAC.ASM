@@ -216,6 +216,8 @@ jump    macro lbl
             ENDIF
         ENDIF
     ENDIF
+    lbl&_j = a
+.cref
 endm
 
 BREAK <RETURN - return from a function>
@@ -226,6 +228,7 @@ return  macro
 a:
     RET
 ret_l = a
+.cref
 endm
 
 BREAK <CONDRET - conditional return>
