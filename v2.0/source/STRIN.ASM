@@ -34,11 +34,11 @@ NEWLIN:
         MOV     [INSMODE],CH    ;Insert mode off
         MOV     BH,CH           ;No chars from template yet
         MOV     DH,CH           ;No chars to new line yet
-        invoke  $STD_CON_INPUT_NO_ECHO          ;Get first char
+        $INVOKE  $STD_CON_INPUT_NO_ECHO          ;Get first char
         CMP     AL,c_LF         ;Linefeed
         JNZ     GOTCH           ;Filter out LF so < works
         entry   GETCH
-        invoke  $STD_CON_INPUT_NO_ECHO
+        $INVOKE  $STD_CON_INPUT_NO_ECHO
 GOTCH:
         CMP     AL,"F"-"@"      ;Ignore ^F
         JZ      GETCH
@@ -59,7 +59,7 @@ SAVCH:
         JAE     BUFFUL          ;No room
         STOSB
         INC     DH              ;Got a char
-        invoke  BUFOUT          ;Print control chars nicely
+        $INVOKE  BUFOUT          ;Print control chars nicely
         CMP     BYTE PTR [INSMODE],0
         JNZ     GETCH           ;In insert mode, get more chars
         CMP     BH,BL
@@ -72,7 +72,7 @@ BACKSPJ: JMP    SHORT BACKSP
 
 BUFFUL:
         MOV     AL,7            ;Bell
-        invoke  OUT
+        $INVOKE  OUT1
         JMP     SHORT GETCH
 
 ESC:
@@ -80,7 +80,7 @@ ESC:
 
 ENDLIN:
         STOSB                   ;Put the CR in the buffer
-        invoke  OUT             ;Echo it
+        $INVOKE  OUT1            ;Echo it
         POP     DI              ;Get start of buffer
         MOV     [DI-1],DH       ;Tell user how many bytes
         INC     DH              ;DH is length including CR
@@ -97,24 +97,24 @@ COPYNEW:
 ;Output a CRLF
         entry   CRLF
         MOV     AL,c_CR
-        invoke  OUT
+        $INVOKE  OUT1
         MOV     AL,c_LF
-        JMP     OUT
+        JMP     OUT1
 
 ;Output a CRLF which is not terminate buffer
 PHYCRLF:
-        invoke  CRLF
+        $INVOKE  CRLF
         JMP     GETCH
 
 ;Zap the line without zapping the template
         entry   KILNEW
         MOV     AL,"\"
-        invoke  OUT             ;Print the CANCEL indicator
+        $INVOKE  OUT1            ;Print the CANCEL indicator
         POP     SI              ;Remember start of edit buffer
 PUTNEW:
-        invoke  CRLF            ;Go to next line on screen
+        $INVOKE  CRLF            ;Go to next line on screen
         MOV     AL,[STARTPOS]
-        invoke  TAB             ;Tab over
+        $INVOKE  TAB             ;Tab over
         JMP     NEWLIN          ;Start over again
 
 ;Back up one char
@@ -166,7 +166,7 @@ HAVTAB:
         POP     DI
         JZ      OLDBAK          ;Nothing to erase
 TABBAK:
-        invoke  BACKMES
+        $INVOKE  BACKMES
         LOOP    TABBAK          ;Erase correct number of chars
         JMP     SHORT OLDBAK
 
@@ -175,11 +175,11 @@ BACKUP:
         DEC     DI
 BACKMES:
         MOV     AL,c_BS         ;Backspace
-        invoke  OUT
+        $INVOKE  OUT1
         MOV     AL," "          ;Erase
-        invoke  OUT
+        $INVOKE  OUT1
         MOV     AL,c_BS         ;Backspace
-        JMP     OUT             ;Done
+        JMP     OUT1            ;Done
 
 ;User really wants an ESC character in his line
         entry   TwoEsc
@@ -193,7 +193,7 @@ BACKMES:
         JMP     SHORT COPYEACH
 
         entry   CopyStr
-        invoke  FINDOLD         ;Find the char
+        $INVOKE  FINDOLD         ;Find the char
         JMP     SHORT COPYEACH  ;Copy up to it
 
 ;Copy one char from template to line
@@ -208,7 +208,7 @@ COPYEACH:
         JZ      GETCH2                  ;At end of template, can't do anything
         LODSB
         STOSB
-        invoke  BUFOUT
+        $INVOKE  BUFOUT
         INC     BH                      ;Ahead in template
         INC     DH                      ;Ahead in line
         LOOP    COPYEACH
@@ -224,7 +224,7 @@ GETCH2:
         JMP     GETCH
 
         entry   SKIPSTR
-        invoke  FINDOLD                 ;Find out how far to go
+        $INVOKE  FINDOLD                 ;Find out how far to go
         ADD     SI,CX                   ;Go there
         ADD     BH,CL
         JMP     GETCH
@@ -236,10 +236,10 @@ GETCH2:
 ;       Make sure nothing extra on stack when this routine
 ;       is called!!! (no PUSHes before calling it).
 FINDOLD:
-        invoke  $STD_CON_INPUT_NO_ECHO
+        $INVOKE  $STD_CON_INPUT_NO_ECHO
         CMP     AL,[ESCCHAR]            ; did he type a function key?
         JNZ     FindSetup               ; no, set up for scan
-        invoke  $STD_CON_INPUT_NO_ECHO  ; eat next char
+        $INVOKE  $STD_CON_INPUT_NO_ECHO  ; eat next char
         JMP     NotFnd                  ; go try again
 FindSetup:
         MOV     CL,BL
@@ -268,12 +268,12 @@ NOTFND:
 
         entry   REEDIT
         MOV     AL,"@"          ;Output re-edit character
-        invoke  OUT
+        $INVOKE  OUT1
         POP     DI
         PUSH    DI
         PUSH    ES
         PUSH    DS
-        invoke  COPYNEW         ;Copy current line into template
+        $INVOKE  COPYNEW         ;Copy current line into template
         POP     DS
         POP     ES
         POP     SI

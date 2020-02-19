@@ -116,7 +116,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 
         IF      IBM
         IF      NOT IBM
-        invoke  save_world
+        $INVOKE  save_world
         XOR     AX,AX           ; Inserted = Removed = FALSE
         LES     CX,[DI.NEXTBUF]
         MOV     BP,ES           ; Pointsave = Buf.nextbuf
@@ -188,7 +188,7 @@ ISLAST:                 ; If Curbuf is LAST
         MOV     WORD PTR ES:[DI.NEXTBUF],-1
         MOV     WORD PTR ES:[DI.NEXTBUF+2],-1      ; Buf is LAST
 NRET:
-        invoke  restore_world
+        $INVOKE  restore_world
         return
 
 SHUFFLE:
@@ -205,7 +205,7 @@ NODEC:
         ENDIF
         ENDIF
 
-        invoke  save_world
+        $INVOKE  save_world
         LES     CX,[DI.NEXTBUF]
         CMP     CX,-1           ; Buf is LAST?
         JZ      NRET            ; Buffer already last
@@ -252,7 +252,7 @@ GOTHEEND:
         MOV     WORD PTR ES:[DI.NEXTBUF],-1
         MOV     WORD PTR ES:[DI.NEXTBUF+2],-1      ; Buf is LAST
 NRET:
-        invoke  restore_world
+        $INVOKE  restore_world
         return
 
 PLACEBUF    ENDP
@@ -262,7 +262,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 
 ; SAME AS PLACEBUF except places buffer at head
 
-        invoke  save_world
+        $INVOKE  save_world
         PUSH    DS
         POP     ES
         LDS     SI,[BUFFHEAD]
@@ -373,10 +373,10 @@ RDSEC:                          ; Read in the new sector
         PUSH    DX
         OR      SI,SI
         JZ      NORMSEC
-        invoke  FATSECRD
+        $INVOKE  FATSECRD
         JMP     SHORT GOTTHESEC         ; Buffer is marked free if read barfs
 NORMSEC:
-        invoke  DREAD                   ; Buffer is marked free if read barfs
+        $INVOKE  DREAD                   ; Buffer is marked free if read barfs
 GOTTHESEC:
         POP     DX
         POP     DI
@@ -491,7 +491,7 @@ WRTAGAIN:
         MOV     CX,1
         PUSH    BX
         PUSH    DX
-        invoke  DWRITE          ; Write out the dirty buffer
+        $INVOKE  DWRITE          ; Write out the dirty buffer
         POP     DX
         POP     BX
         POP     AX

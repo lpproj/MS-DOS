@@ -204,7 +204,7 @@ IF IBM
 ENDIF
 IF NOT IBM
         XOR     AL,AL                   ; open for reading
-        invoke  $OPEN                   ; is the file there?
+        $INVOKE  $OPEN                   ; is the file there?
 ENDIF
         JC      exec_ret_err
         MOV     [exec_fh],AX
@@ -215,7 +215,7 @@ IF IBM
 ENDIF
 IF NOT IBM
         XOR     AL,AL
-        invoke  $IOCTL
+        $INVOKE  $IOCTL
 ENDIF
         TEST    DL,devid_ISDEV
         JZ      exec_check_environ
@@ -264,7 +264,7 @@ IF IBM
         INT     int_command
 ENDIF
 IF NOT IBM
-        invoke  $ALLOC                  ; can we get the space?
+        $INVOKE  $ALLOC                  ; can we get the space?
 ENDIF
         POP     DS
         POP     CX
@@ -317,7 +317,7 @@ IF IBM
         INT     int_command
 ENDIF
 IF NOT IBM
-        invoke  $READ
+        $INVOKE  $READ
 ENDIF
         CALL    exec_alloc
         POP     DS
@@ -385,7 +385,7 @@ IF IBM
         INT     int_command
 ENDIF
 IF NOT IBM
-        invoke  $CLOSE
+        $INVOKE  $CLOSE
 ENDIF
         POP     AX
         transfer    SYS_RET_ERR
@@ -405,7 +405,7 @@ IF IBM
         INT     int_command
 ENDIF
 IF NOT IBM
-        invoke  $ALLOC                  ; should have carry set and BX has max
+        $INVOKE  $ALLOC                  ; should have carry set and BX has max
 ENDIF
         POP     DS
         POP     AX
@@ -438,7 +438,7 @@ IF IBM
         INT     int_command
 ENDIF
 IF NOT IBM
-        invoke  $ALLOC                  ; get the space
+        $INVOKE  $ALLOC                  ; get the space
 ENDIF
         POP     DS
         JC      exec_no_mem
@@ -504,7 +504,7 @@ IF IBM
 ENDIF
 IF NOT IBM
         XOR     AL,AL
-        invoke  $LSEEK                  ; seek to resident
+        $INVOKE  $LSEEK                  ; seek to resident
 ENDIF
         POP     DS
 
@@ -532,7 +532,7 @@ IF IBM
         INT     int_command
 ENDIF
 IF NOT IBM
-        invoke  $READ                   ; WOMP!
+        $INVOKE  $READ                   ; WOMP!
 ENDIF
         CALL    exec_alloc
         POP     CX                      ; get old count to verify
@@ -584,7 +584,7 @@ IF IBM
 ENDIF
 IF NOT IBM
         XOR     AX,AX
-        invoke  $LSEEK
+        $INVOKE  $LSEEK
 ENDIF
         POP     DS
 
@@ -613,7 +613,7 @@ IF IBM
         INT     int_command
 ENDIF
 IF NOT IBM
-        invoke  $READ
+        $INVOKE  $READ
 ENDIF
         CALL    exec_alloc
         POP     ES
@@ -681,7 +681,7 @@ IF IBM
         INT     int_command
 ENDIF
 IF NOT IBM
-        invoke  $ALLOC                  ; largest piece available as error
+        $INVOKE  $ALLOC                  ; largest piece available as error
 ENDIF
         OR      BX,BX
         JZ      exec_no_memj
@@ -692,7 +692,7 @@ IF IBM
 ENDIF
 IF NOT IBM
         PUSH    BX
-        invoke  $ALLOC                  ; largest piece available as error
+        $INVOKE  $ALLOC                  ; largest piece available as error
         POP     BX                      ; get size of block...
 ENDIF
         MOV     [exec_load_block],AX
@@ -734,7 +734,7 @@ IF IBM
 ENDIF
 IF NOT IBM
         XOR     AX,AX                   ; seek relative to beginning
-        invoke  $LSEEK                  ; back to beginning of file
+        $INVOKE  $LSEEK                  ; back to beginning of file
 ENDIF
         MOV     BX,[exec_fh]
         POP     CX                      ; number to read
@@ -747,7 +747,7 @@ IF IBM
         INT     int_command
 ENDIF
 IF NOT IBM
-        invoke  $READ                   ; read in com file
+        $INVOKE  $READ                   ; read in com file
 ENDIF
         CALL    exec_alloc
         POP     SI                      ; get number of bytes to read
@@ -782,7 +782,7 @@ IF IBM
         INT     int_command
 ENDIF
 IF NOT IBM
-        invoke  $CLOSE                  ; release the jfn
+        $INVOKE  $CLOSE                  ; release the jfn
 ENDIF
         CALL    exec_alloc
         TEST    BYTE PTR [exec_func],exec_func_overlay
@@ -818,7 +818,7 @@ IF IBM
 ENDIF
 IF NOT IBM
         MOV     BYTE PTR [CreatePDB], 0FFH  ; indicate a new process
-        invoke  $Dup_PDB                    ; ES is now PDB
+        $INVOKE  $Dup_PDB                    ; ES is now PDB
 ENDIF
         POP     DX
         PUSH    [exec_environ]
@@ -877,7 +877,7 @@ exec_BL:
 exec_BL_good:
         XOR     BL,BL
 exec_set_return:
-        invoke  get_user_stack          ; get his return address
+        $INVOKE  get_user_stack          ; get his return address
         PUSH    [SI.user_CS]            ; suck out the CS and IP
         PUSH    [SI.user_IP]
         PUSH    [SI.user_CS]            ; suck out the CS and IP

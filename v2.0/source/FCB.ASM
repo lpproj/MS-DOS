@@ -240,7 +240,7 @@ ASSUME  DS:DOSGROUP,ES:DOSGROUP
         MOV     CX,10
         REP     STOSW           ; Fill FCB with zeros
         STOSB
-        invoke  DATE16
+        $INVOKE  DATE16
         MOV     DI,OFFSET DOSGROUP:DEVFCB+22
         XCHG    AX,DX
         STOSW
@@ -289,7 +289,7 @@ MOVSTART:
         MOV     AH,[SI-1]       ; Attribute byte
         LODSB                   ; Get drive select byte
 HAVATTRB:
-        invoke  GETTHISDRV
+        $INVOKE  GETTHISDRV
         retc
         PUSH    DS
         PUSH    DX
@@ -318,16 +318,16 @@ HAVATTRB:
 ; check for device name first, eliminating drive hits on devices
 ;
         context DS
-        invoke  DEVNAME
+        $INVOKE  DEVNAME
         JNC     DrvNoSet            ; we have a device
 
 ;
 ; make sure that everything is current
 ;
-        invoke  FATREAD
+        $INVOKE  FATREAD
         ASSUME  DS:NOTHING,ES:NOTHING
         MOV     BYTE PTR [ATTRIB],attr_directory+attr_hidden+attr_system
-        invoke  GETCURRDIR
+        $INVOKE  GETCURRDIR
 DrvNoSet:
         POP     AX
         MOV     BYTE PTR [ATTRIB],AH

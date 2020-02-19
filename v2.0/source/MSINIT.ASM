@@ -46,7 +46,7 @@ SETFINDPB:
         PUSH    ES
         INC     DX                          ; Leave enough room for the ARENA
         MOV     BYTE PTR [CreatePDB],0FFh   ; create jfns and set CurrentPDB
-        invoke  $CREATE_PROCESS_DATA_BLOCK     ; Set up segment
+        $INVOKE  $CREATE_PROCESS_DATA_BLOCK     ; Set up segment
 ASSUME  DS:NOTHING,ES:NOTHING
         POP     ES
 ASSUME  ES:DOSGROUP
@@ -171,7 +171,7 @@ PERUNIT:
         PUSH    BX
         PUSH    CX
         PUSH    DX
-        invoke  $SETDPB
+        $INVOKE  $SETDPB
         MOV     AX,ES:[BP.dpb_sector_size]
         CMP     AX,[MAXSEC]
         JBE     NOTMAX
@@ -326,7 +326,7 @@ ASSUME  DS:DOSGROUP,ES:DOSGROUP
         MOV     AX,[ENDMEM]
         MOV     DX,DI
 
-        invoke    SETMEM          ; Basic Header
+        $INVOKE    SETMEM          ; Basic Header
 ASSUME  DS:NOTHING,ES:NOTHING
         PUSH    CS
         POP     DS
@@ -349,7 +349,7 @@ ASSUME  ES:DOSGROUP
         IF      NOT IBM
         IF      NOT ALTVECT
         MOV     SI,OFFSET DOSGROUP:HEADER
-        invoke  OUTMES
+        $INVOKE  OUTMES
         PUSH    CS                      ; Outmes stomps on segments
         POP     DS
         PUSH    CS
@@ -390,7 +390,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
         MOV     BX,OFFSET DOSGROUP:DEVCALL
         PUSH    CS
         POP     ES
-        invoke  DEVIOCALL2
+        $INVOKE  DEVIOCALL2
         POP     AX
         POP     BX
         POP     ES

@@ -73,10 +73,10 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         MOV     BX,[DIRSTART]
         OR      BX,BX
         JZ      NULLDIR
-        invoke  GETEOF
+        $INVOKE  GETEOF
 NULLDIR:
         MOV     CX,1
-        invoke  ALLOCATE
+        $INVOKE  ALLOCATE
         retc
         MOV     DX,[DIRSTART]
         OR      DX,DX
@@ -91,7 +91,7 @@ ADDINGDIR:
 NOTFIRSTGROW:
         MOV     DX,BX
         XOR     BL,BL
-        invoke  FIGREC
+        $INVOKE  FIGREC
 GOTDIRREC:
         MOV     CL,ES:[BP.dpb_cluster_mask]
         INC     CL
@@ -99,7 +99,7 @@ GOTDIRREC:
 ZERODIR:
         PUSH    CX
         MOV     AL,0FFH
-        invoke  GETBUFFR
+        $INVOKE  GETBUFFR
         MOV     CX,ES:[BP.dpb_sector_size]
         PUSH    ES
         LES     DI,[CURBUF]
@@ -158,7 +158,7 @@ PAGE
         entry   GETFILE
 ASSUME  DS:NOTHING,ES:NOTHING
 ; Same as GETNAME except ES:DI points to FCB on successful return
-        invoke  MOVNAME
+        $INVOKE  MOVNAME
         retc
         PUSH    DX
         PUSH    DS
@@ -190,7 +190,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;       [NAME1] has file name
 ; All other registers destroyed.
 
-        invoke  MOVNAME
+        $INVOKE  MOVNAME
 ASSUME  ES:DOSGROUP
         retc                    ; Bad file name?
 
@@ -198,9 +198,9 @@ ASSUME  ES:DOSGROUP
         PUSH    SS
         POP     DS
 ASSUME  DS:DOSGROUP
-        invoke  DEVNAME
+        $INVOKE  DEVNAME
         JC      FindEntry
-        invoke  BUILDFCB
+        $INVOKE  BUILDFCB
         return
 ASSUME  ES:NOTHING
 
@@ -358,7 +358,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         DIV     BX
         MOV     BX,DX                   ; Position within sector
         PUSH    BX
-        invoke  DIRREAD
+        $INVOKE  DIRREAD
         POP     BX
 SETENTRY:
         MOV     DX,WORD PTR [CURBUF]
@@ -413,7 +413,7 @@ ASSUME  DS:NOTHING
         INC     DX
         POP     DS
 ASSUME  DS:DOSGROUP
-        invoke  FIRSTCLUSTER
+        $INVOKE  FIRSTCLUSTER
         XOR     BX,BX
         JMP     SETENTRY
 Search  ENDP
@@ -498,12 +498,12 @@ ASSUME  DS:DOSGROUP
         MOV     AL,ES:[BP.dpb_cluster_mask]
         INC     AL
         MOV     BYTE PTR [CLUSFAC],AL
-        invoke  UNPACK
+        $INVOKE  UNPACK
         MOV     [CLUSNUM],DI
         MOV     DX,BX
         XOR     BL,BL
         MOV     BYTE PTR [SECCLUSPOS],BL
-        invoke  FIGREC
+        $INVOKE  FIGREC
         MOV     [DIRSEC],DX
         return
 Dir_search  ENDP
@@ -617,7 +617,7 @@ NOTLDOT:
         PUSH    DI
         PUSH    ES
         MOV     AX,CX
-        invoke  NewEntry
+        $INVOKE  NewEntry
         POP     DS
         POP     ES
 SET2ERR:
@@ -676,7 +676,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
         MOV     WORD PTR [DRIVESPEC],AX
         MOV     BYTE PTR [ATTRIB],attr_directory+attr_system+attr_hidden
         LODSB
-        invoke  PATHCHRCMP
+        $INVOKE  PATHCHRCMP
         JZ      DEFAULTROOT
         MOV     AH,AL
         LODSB
@@ -708,11 +708,11 @@ GOFIND:
 DEFPATH:
         XOR     AL,AL
 DRVPATH:
-        invoke  GETTHISDRV
+        $INVOKE  GETTHISDRV
         retc                    ; Bad drive
         PUSH    SS
         POP     DS
-        invoke  FATREAD
+        $INVOKE  FATREAD
         CLC
         return
 
@@ -740,7 +740,7 @@ BUILDFCBJ:
         POP     AX
         POP     AX
         context es
-        invoke  BUILDFCB        ; Clears carry sets zero
+        $INVOKE  BUILDFCB        ; Clears carry sets zero
         INC     AL              ; reset zero
         return
 
@@ -762,7 +762,7 @@ DRVSPEC:
         POP     DS
         retc                    ; Bad drive
         LODSB
-        invoke  PATHCHRCMP
+        $INVOKE  PATHCHRCMP
         JZ      ROOTSRCH
         DEC     SI
         PUSH    DS
@@ -786,7 +786,7 @@ CHKPRESTRING:
         REPE    CMPSB
         JZ      GOTPRESTRING
         DEC     SI
-        invoke  GETLET          ; Try convert to upper case
+        $INVOKE  GETLET          ; Try convert to upper case
         CMP     AL,ES:[DI-1]
         JZ      CHKPRESTRING
 NOPRESTRING:
@@ -795,16 +795,16 @@ NOPRESTRING:
 
 GOTPRESTRING:
         LODSB
-        invoke  PATHCHRCMP
+        $INVOKE  PATHCHRCMP
         JNZ     NOPRESTRING
 GOTPRESTRING2:
         MOV     DI,OFFSET DOSGROUP:NAME1
         MOV     CX,9
 TESTLOOP:
-        invoke  GETLET
+        $INVOKE  GETLET
         CMP     AL,'.'
         JZ      TESTDEVICE
-        invoke  PATHCHRCMP
+        $INVOKE  PATHCHRCMP
         JZ      NOTDEV
         OR      AL,AL
         JZ      TESTDEVICE
@@ -820,7 +820,7 @@ TESTDEVICE:
         REP     STOSB
         PUSH    SS
         POP     DS
-        invoke  DEVNAME
+        $INVOKE  DEVNAME
         return
 GETPATH ENDP
 
@@ -891,7 +891,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 
         PUSH    ES
         PUSH    SI
-        invoke  NAMETRANS
+        $INVOKE  NAMETRANS
         MOV     CL,AL
         OR      CL,80H
         POP     DI
@@ -916,7 +916,7 @@ check_device:
 ;
         PUSH    ES
         context ES
-        invoke  DevName         ; blast BX
+        $INVOKE  DevName         ; blast BX
         POP     ES
         ASSUME  ES:NOTHING
         JC      FindFile
@@ -925,7 +925,7 @@ check_device:
         POP     SI
         POP     SI
         context ES
-        invoke  BuildFCB
+        $INVOKE  BuildFCB
         INC     AL
         return
 
@@ -975,7 +975,7 @@ SetDir:
 ASSUME  DS:DOSGROUP
         POP     DX
         XOR     AL,AL
-        invoke  GETBUFFR
+        $INVOKE  GETBUFFR
         POP     CX
         POP     SI
         POP     AX
@@ -991,7 +991,7 @@ ASSUME  DS:NOTHING
         JZ      SETRET
         INC     DI
         MOV     SI,DI
-        invoke  PATHCHRCMP
+        $INVOKE  PATHCHRCMP
         JNZ     find_bad_name
         JMP     FINDPATH
 

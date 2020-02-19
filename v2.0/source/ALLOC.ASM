@@ -181,7 +181,7 @@ alloc_end:
         JNZ     alloc_do_split
 
 alloc_fail:
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         POP     BX
         MOV     [SI].user_BX,BX
         error   error_not_enough_memory

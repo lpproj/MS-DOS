@@ -70,7 +70,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         PUSH    SI
         PUSH    BX
         MOV     BX,1
-        invoke  get_sf_from_jfn
+        $INVOKE  get_sf_from_jfn
         ADD     DI,sf_fcb
         MOV     BL,BYTE PTR [COUTDSAV]
         LDS     SI,[COUTSAV]
@@ -82,7 +82,7 @@ ASSUME  DS:NOTHING
         POP     DS
 ASSUME  DS:DOSGROUP
         XOR     BX,BX
-        invoke  get_sf_from_jfn
+        $INVOKE  get_sf_from_jfn
         ADD     DI,sf_fcb
         MOV     BL,BYTE PTR [CINDSAV]
         LDS     SI,[CINSAV]
@@ -112,7 +112,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         MOV     BYTE PTR [CONSWAP],1
         MOV     BYTE PTR [IDLEINT],0
         XOR     BX,BX
-        invoke  get_sf_from_jfn
+        $INVOKE  get_sf_from_jfn
         ADD     DI,sf_fcb
         MOV     BL,ES:[DI.fcb_DEVID]
         MOV     BYTE PTR [CINDSAV],BL
@@ -130,7 +130,7 @@ ASSUME  DS:NOTHING
         POP     DS
 ASSUME  DS:DOSGROUP
         MOV     BX,1
-        invoke  get_sf_from_jfn
+        $INVOKE  get_sf_from_jfn
         ADD     DI,sf_fcb
         MOV     BL,ES:[DI.fcb_DEVID]
         MOV     BYTE PTR [COUTDSAV],BL
@@ -188,15 +188,15 @@ DVRDRAWR:
         MOV     BX,DI                   ; DS:BX transfer addr
         XOR     DX,DX                   ; Start at 0
         XOR     AX,AX                   ; Media Byte, unit = 0
-        invoke  SETREAD
+        $INVOKE  SETREAD
         LDS     SI,[THISFCB]
-        invoke  DEVIOCALL
+        $INVOKE  DEVIOCALL
         MOV     DX,DI                   ; DX is preserved by INT 24
         MOV     AH,86H                  ; Read error
         MOV     DI,[DEVCALL.REQSTAT]
         TEST    DI,STERR
         JZ      CRDROK                  ; No errors
-        invoke  CHARHARD
+        $INVOKE  CHARHARD
         MOV     DI,DX
         CMP     AL,1
         JZ      DVRDRAWR                ; Retry
@@ -220,19 +220,19 @@ ASSUME  DS:NOTHING
         MOV     AX,DX
         PUSH    CX
         MOV     CX,1
-        invoke  SETREAD
+        $INVOKE  SETREAD
         POP     CX
         LDS     SI,[THISFCB]
         LDS     SI,DWORD PTR [SI.fcb_FIRCLUS]
 DVRDLP:
-        invoke  DSKSTATCHK
-        invoke  DEVIOCALL2
+        $INVOKE  DSKSTATCHK
+        $INVOKE  DEVIOCALL2
         PUSH    DI
         MOV     AH,86H
         MOV     DI,[DEVCALL.REQSTAT]
         TEST    DI,STERR
         JZ      CRDOK
-        invoke  CHARHARD
+        $INVOKE  CHARHARD
         POP     DI
         MOV     [CALLSCNT],1
         CMP     AL,1
@@ -273,7 +273,7 @@ NORMCH:
         LOOPNZ  TRANBUF
         JNZ     ENDRDCON
         XOR     SI,SI           ; Cause a new buffer to be read
-        invoke  OUT             ; Transmit linefeed
+        $INVOKE  OUT             ; Transmit linefeed
         OR      AL,1            ; Clear zero flag--not end of file
 ENDRDCON:
         PUSH    SS
@@ -309,7 +309,7 @@ GETBUF:
         PUSH    ES
         PUSH    DI
         MOV     DX,OFFSET DOSGROUP:CONBUF
-        invoke  $STD_CON_STRING_INPUT           ; Get input buffer
+        $INVOKE  $STD_CON_STRING_INPUT           ; Get input buffer
         POP     DI
         POP     ES
         POP     CX
@@ -320,7 +320,7 @@ GETBUF:
         STOSB
         DEC     DI
         MOV     AL,10
-        invoke  OUT             ; Send linefeed
+        $INVOKE  OUT             ; Send linefeed
         XOR     SI,SI
         JMP     SHORT ENDRDCON
 
@@ -346,7 +346,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ASSUME  DS:DOSGROUP
         OR      BL,BL
         JS      WRTDEV
-        invoke  DATE16
+        $INVOKE  DATE16
         MOV     ES:[DI.fcb_FDATE],AX
         MOV     ES:[DI.fcb_FTIME],DX
         call    DISKWRITE
@@ -366,7 +366,7 @@ WRCONLP:
         LODSB
         CMP     AL,1AH          ; ^Z?
         JZ      CONEOF
-        invoke  OUT
+        $INVOKE  OUT
         LOOP    WRCONLP
 CONEOF:
         POP     AX                      ; Count
@@ -379,15 +379,15 @@ ASSUME  DS:DOSGROUP
 DVWRTRAW:
 ASSUME  DS:NOTHING
         XOR     AX,AX                   ; Media Byte, unit = 0
-        invoke  SETWRITE
+        $INVOKE  SETWRITE
         LDS     SI,[THISFCB]
-        invoke  DEVIOCALL
+        $INVOKE  DEVIOCALL
         MOV     DX,DI
         MOV     AH,87H
         MOV     DI,[DEVCALL.REQSTAT]
         TEST    DI,STERR
         JZ      CWRTROK
-        invoke  CHARHARD
+        $INVOKE  CHARHARD
         MOV     BX,DX                   ; Recall transfer addr
         CMP     AL,1
         JZ      DVWRTRAW                ; Try again
@@ -425,19 +425,19 @@ ASSUME  DS:NOTHING
         JZ      WRTCOOKDONE             ; Yes, transfer nothing
         PUSH    CX
         MOV     CX,1
-        invoke  SETWRITE
+        $INVOKE  SETWRITE
         POP     CX
         LDS     SI,[THISFCB]
         LDS     SI,DWORD PTR [SI.fcb_FIRCLUS]
 DVWRTLP:
-        invoke  DSKSTATCHK
-        invoke  DEVIOCALL2
+        $INVOKE  DSKSTATCHK
+        $INVOKE  DEVIOCALL2
         PUSH    DI
         MOV     AH,87H
         MOV     DI,[DEVCALL.REQSTAT]
         TEST    DI,STERR
         JZ      CWROK
-        invoke  CHARHARD
+        $INVOKE  CHARHARD
         POP     DI
         MOV     [CALLSCNT],1
         CMP     AL,1
@@ -477,7 +477,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ASSUME  DS:DOSGROUP
         PUSH    ES
         PUSH    DI
-        invoke  get_sf_from_jfn
+        $INVOKE  get_sf_from_jfn
         JC      RET44P
         MOV     SI,DI
         ADD     SI,sf_fcb
@@ -538,7 +538,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         MOV     [NXTCLUSNUM],BX
         JCXZ    FIRSTCLUSTER
 SKPCLLP:
-        invoke  UNPACK
+        $INVOKE  UNPACK
         XCHG    BX,DI
         CMP     BX,0FF8H
         JAE     HAVESKIPPED
@@ -547,11 +547,11 @@ HAVESKIPPED:
         MOV     [NXTCLUSNUM],BX
         MOV     DX,DI
         MOV     BL,AH
-        invoke  FIGREC
+        $INVOKE  FIGREC
         entry   FIRSTCLUSTER
         XOR     AL,AL           ; Indicate pre-read
         MOV     AH,DIRPRI
-        invoke  GETBUFFR
+        $INVOKE  GETBUFFR
         ret
 DirRead ENDP
 
@@ -610,7 +610,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
         CALL    DSKREAD
         retz
         MOV     BYTE PTR [READOP],0
-        invoke  HARDERR
+        $INVOKE  HARDERR
         CMP     AL,1            ; Check for retry
         JZ      DREAD
         return                  ; Ignore otherwise
@@ -643,7 +643,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
         MOV     AL,ES:[BP.dpb_UNIT]
         PUSH    BX
         PUSH    ES
-        invoke  SETREAD
+        $INVOKE  SETREAD
         JMP     DODSKOP
 
 SUBTTL DWRITE -- SEE ABOUT WRITING
@@ -664,7 +664,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
         CALL    DSKWRITE
         retz
         MOV     BYTE PTR [READOP],1
-        invoke  HARDERR
+        $INVOKE  HARDERR
         CMP     AL,1            ; Check for retry
         JZ      DWRITE
         return
@@ -694,13 +694,13 @@ ASSUME  DS:NOTHING,ES:NOTHING
         MOV     AL,ES:[BP.dpb_UNIT]
         PUSH    BX
         PUSH    ES
-        invoke  SETWRITE
+        $INVOKE  SETWRITE
 DODSKOP:
         MOV     CX,DS           ; Save DS
         POP     DS              ; DS:BP points to DPB
         PUSH    DS
         LDS     SI,DS:[BP.dpb_driver_addr]
-        invoke  DEVIOCALL2
+        $INVOKE  DEVIOCALL2
         MOV     DS,CX           ; Restore DS
         POP     ES              ; Restore ES
         POP     BX
@@ -763,7 +763,7 @@ ASSUME  DS:DOSGROUP
         JNS     NOTDEVICE
         XOR     AL,AL           ; Fake in drive 0 so we can get BP
 NOTDEVICE:
-        invoke  GETBP
+        $INVOKE  GETBP
         POP     AX
         JNC     CheckRecLen
         XOR     CX,CX
@@ -912,7 +912,7 @@ ENUF:
         LES     BP,[THISDPB]
         CALL    BREAKDOWN
         MOV     CX,[CLUSNUM]
-        invoke  FNDCLUS
+        $INVOKE  FNDCLUS
         OR      CX,CX
         JZ      SHORT SKIPERR
 RDERR:
@@ -926,11 +926,11 @@ SKIPERR:
         MOV     [CLUSNUM],BX
         CMP     [BYTCNT1],0
         JZ      RDMID
-        invoke  BUFRD
+        $INVOKE  BUFRD
 RDMID:
         CMP     [SECCNT],0
         JZ      RDLASTJ
-        invoke  NEXTSEC
+        $INVOKE  NEXTSEC
         JC      SETFCBJ2
         MOV     BYTE PTR [TRANS],1      ; A transfer is taking place
 ONSEC:
@@ -938,7 +938,7 @@ ONSEC:
         MOV     CX,[SECCNT]
         MOV     BX,[CLUSNUM]
 RDLP:
-        invoke  OPTIMIZE
+        $INVOKE  OPTIMIZE
         PUSH    DI
         PUSH    AX
         PUSH    BX
@@ -951,7 +951,7 @@ ASSUME  DS:NOTHING
         POP     DX
         ADD     BX,DX           ; Upper bound of read
         MOV     AL,ES:[BP.dpb_drive]
-        invoke  SETVISIT
+        $INVOKE  SETVISIT
 NXTBUF:                         ; Must see if one of these sectors is buffered
         MOV     [DI.VISIT],1    ; Mark as visited
         CMP     AL,[DI.BUFDRV]
@@ -989,9 +989,9 @@ EVENMOV:
         POP     DI
         MOV     AL,ES:[BP.dpb_drive]
 CLBUFF:
-        invoke  SCANPLACE
+        $INVOKE  SCANPLACE
 DONXTBUF:
-        invoke  SKIPVISIT
+        $INVOKE  SKIPVISIT
         JNZ     NXTBUF
         PUSH    SS
         POP     DS
@@ -1011,10 +1011,10 @@ RDLAST:
         OR      AX,AX
         JZ      SETFCB
         MOV     [BYTCNT1],AX
-        invoke  NEXTSEC
+        $INVOKE  NEXTSEC
         JC      SETFCB
         MOV     [BYTSECPOS],0
-        invoke  BUFRD
+        $INVOKE  BUFRD
 
         entry   SETFCB
         LES     SI,[THISFCB]
@@ -1129,9 +1129,9 @@ NORNDUP:
 
 HAVSTART:
         MOV     CX,AX
-        invoke  SKPCLP
+        $INVOKE  SKPCLP
         JCXZ    DOWRTJ
-        invoke  ALLOCATE
+        $INVOKE  ALLOCATE
         JNC     DOWRTJ
 WRTERR:
         XOR     CX,CX
@@ -1156,7 +1156,7 @@ SETGRW:
 NOGROW:
         POP     AX
         MOV     CX,[CLUSNUM]    ; First cluster accessed
-        invoke  FNDCLUS
+        $INVOKE  FNDCLUS
         MOV     [CLUSNUM],BX
         MOV     [LASTPOS],DX
         SUB     AX,DX           ; Last cluster minus current cluster
@@ -1164,7 +1164,7 @@ NOGROW:
         JCXZ    HAVSTART        ; See if no more data
         PUSH    CX              ; No. of clusters short of first
         MOV     CX,AX
-        invoke  ALLOCATE
+        $INVOKE  ALLOCATE
         POP     AX
         JC      WRTERR
         MOV     CX,AX
@@ -1172,7 +1172,7 @@ NOGROW:
         INC     DX
         DEC     CX
         JZ      NOSKIP
-        invoke  SKPCLP
+        $INVOKE  SKPCLP
 NOSKIP:
         MOV     [CLUSNUM],BX
         MOV     [LASTPOS],DX
@@ -1180,19 +1180,19 @@ DOWRT:
         CMP     [BYTCNT1],0
         JZ      WRTMID
         MOV     BX,[CLUSNUM]
-        invoke  BUFWRT
+        $INVOKE  BUFWRT
 WRTMID:
         MOV     AX,[SECCNT]
         OR      AX,AX
         JZ      WRTLAST
         ADD     [SECPOS],AX
-        invoke  NEXTSEC
+        $INVOKE  NEXTSEC
         MOV     BYTE PTR [TRANS],1       ; A transfer is taking place
         MOV     DL,[SECCLUSPOS]
         MOV     BX,[CLUSNUM]
         MOV     CX,[SECCNT]
 WRTLP:
-        invoke  OPTIMIZE
+        $INVOKE  OPTIMIZE
         PUSH    DI
         PUSH    AX
         PUSH    DX
@@ -1200,7 +1200,7 @@ WRTLP:
         MOV     AL,ES:[BP.dpb_drive]
         MOV     BX,CX
         ADD     BX,DX           ; Upper bound of write
-        invoke  SETVISIT
+        $INVOKE  SETVISIT
 ASSUME  DS:NOTHING
 NEXTBUFF:                       ; Search for buffers
         MOV     [DI.VISIT],1    ; Mark as visited
@@ -1211,9 +1211,9 @@ NEXTBUFF:                       ; Search for buffers
         CMP     [DI.BUFSECNO],BX
         JNC     DONEXTBUFF      ; Buffer is not in range of write
         MOV     WORD PTR [DI.BUFDRV],00FFH    ; Free the buffer, it is being over written
-        invoke  SCANPLACE
+        $INVOKE  SCANPLACE
 DONEXTBUFF:
-        invoke  SKIPVISIT
+        $INVOKE  SKIPVISIT
         JNZ     NEXTBUFF
         POP     BX
         POP     DX
@@ -1236,9 +1236,9 @@ WRTLAST:
         OR      AX,AX
         JZ      FINWRT
         MOV     [BYTCNT1],AX
-        invoke  NEXTSEC
+        $INVOKE  NEXTSEC
         MOV     [BYTSECPOS],0
-        invoke  BUFWRT
+        $INVOKE  BUFWRT
 FINWRT:
         LES     DI,[THISFCB]
         MOV     AX,WORD PTR [GROWCNT]
@@ -1264,9 +1264,9 @@ WRTEOF:
         MOV     CL,ES:[BP.dpb_cluster_shift]
         SHR     AX,CL
         MOV     CX,AX
-        invoke  FNDCLUS
+        $INVOKE  FNDCLUS
         JCXZ    RELFILE
-        invoke  ALLOCATE
+        $INVOKE  ALLOCATE
         JC      WRTERRJ
 UPDATE:
         LES     DI,[THISFCB]
@@ -1279,7 +1279,7 @@ UPDATE:
 
 RELFILE:
         MOV     DX,0FFFH
-        invoke  RELBLKS
+        $INVOKE  RELBLKS
         JMP     SHORT UPDATE
 
 KILLFIL:
@@ -1292,7 +1292,7 @@ KILLFIL:
         POP     ES
         OR      BX,BX
         JZ      UPDATE
-        invoke  RELEASE
+        $INVOKE  RELEASE
         JMP     SHORT UPDATE
 DISKWRITE   ENDP
 do_ext

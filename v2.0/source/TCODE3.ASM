@@ -4,7 +4,7 @@ TITLE   PART3 - COMMAND Transient routines.
 
 .xlist
 .xcref
-        INCLUDE DOSSYM.ASM
+        INCLUDE DOSSYMV2.ASM
         INCLUDE DEVSYM.ASM
         INCLUDE COMSEG.ASM
 .list
@@ -44,7 +44,7 @@ ASSUME  CS:TRANGROUP,DS:NOTHING,ES:NOTHING,SS:NOTHING
         EXTRN   PRINT:NEAR,TCOMMAND:NEAR,DELIM:NEAR,GETBATBYT:NEAR
         EXTRN   FCB_TO_ASCZ:NEAR
 
-        PUBLIC  GOTO,$IF,IFERLEV,SHIFT,IFEXISTS
+        PUBLIC  $GOTO,$IF,IFERLEV,SHIFT,IFEXISTS
         PUBLIC  STRCOMP,MesTran,$FOR,IFNOT
         PUBLIC  FORPROC,BATOPEN,BATCLOSE
         PUBLIC  IOSET,TESTDOREIN,TESTDOREOUT
@@ -305,7 +305,7 @@ IFINDCOM:
         JCXZ    IFSTRING
         JMP     SHORT FIRSTCOMP
 IFCOMP:
-        JNZ     IFDIF
+        JNZ     $IFDIF
 FIRSTCOMP:
         LODSB
         MOV     AH,ES:[DI]
@@ -316,7 +316,7 @@ FIRSTCOMP:
         CMP     AL,AH
 IFLP:
         LOOP    IFCOMP
-IFDIF:
+$IFDIF:
         LAHF
         ADD     DI,CX           ; Bump to next position without affecting flags
         MOV     BX,[DI]         ; Get handler address
@@ -479,7 +479,7 @@ SKIPCRLP:
 
 
 ASSUME  DS:TRANGROUP,ES:TRANGROUP
-GOTO:
+$GOTO:
         MOV     DS,[RESSEG]
 ASSUME  DS:RESGROUP
         TEST    [BATCH],-1

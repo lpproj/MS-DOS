@@ -89,7 +89,7 @@ validate_loop:
 validate_loop1:
 
         IF      KANJI
-        invoke  TESTKANJ
+        $INVOKE  TESTKANJ
         JZ      NOTKANJ6
         INC     SI
         JMP     validate_loop
@@ -103,13 +103,13 @@ NOTKANJ6:
         JZ      validate_error
         CMP     AL,"*"
         JZ      validate_error
-        invoke  PathChrCmp
+        $INVOKE  PathChrCmp
         JNZ     validate_loop
         JCXZ    validate_malformed      ;If path sep, cannot have meta yet
         LODSB                           ;Look ahead one char
         OR      AL,AL
         JZ      validate_checktslsh     ;Trailing path sep
-        invoke  PathChrCmp
+        $INVOKE  PathChrCmp
         JNZ     validate_loop1          ;Double path sep?
 validate_malformed:
         INC     CX
@@ -155,7 +155,7 @@ BREAK <Access_path - determine if file found>
         CALL    Validate_path
         JC      access_no_path
         MOV     SI,DX
-        invoke  GetPath
+        $INVOKE  GetPath
         retnc
         MOV     AL,error_file_not_found
         OR      CL,CL
@@ -289,7 +289,7 @@ OPEN_get_jfn:
         MOV     open_name,DX
         MOV     open_access,AL
 
-        invoke  Find_free_jfn           ; scan through user's area
+        $INVOKE  Find_free_jfn           ; scan through user's area
         ; ES:DI is the jfn entry
         JNC     OPEN_get_sfn
 OPEN_too_many:
@@ -298,7 +298,7 @@ OPEN_too_many:
 OPEN_get_sfn:
         MOV     OPEN_jfn_b,ES
         MOV     OPEN_jfn,DI
-        invoke  Find_free_sfn           ; get a free sft entry
+        $INVOKE  Find_free_sfn           ; get a free sft entry
         ; ES:DI is the SFT entry that's free, SI is the sfn
         JC      OPEN_too_many
 
@@ -379,7 +379,7 @@ NOTKTRAN:
         LES     DI,DWORD PTR [open_sfoff]
         ADD     DI,sf_fcb               ; offset on fcb in sf entry
         MOV     AH,open_devid
-        invoke  DOOPEN                  ; let open code fill in blanks
+        $INVOKE  DOOPEN                  ; let open code fill in blanks
         context DS
         LES     DI,DWORD PTR [open_sfoff]
         INC     ES:[DI].sf_ref_count    ; reference this FCB
@@ -433,10 +433,10 @@ unlink_doit:
         AND     BX,0FFFh
         context DS
         JZ      unlink_flush
-        invoke  RELEASE
+        $INVOKE  RELEASE
 unlink_flush:
         MOV     AL,BYTE PTR ES:[BP.DPB_drive]
-        invoke  FLUSHBUF
+        $INVOKE  FLUSHBUF
         transfer    SYS_RET_OK
 $UNLINK ENDP
 
@@ -475,7 +475,7 @@ unlink_do_make:
         POP     DS
         PUSH    DS
 ASSUME  DS:NOTHING
-        invoke  MakeNode
+        $INVOKE  MakeNode
         POP     DS
         POP     DX
         OR      AL,AL
@@ -504,13 +504,13 @@ BREAK <$DUP - duplicate a jfn>
         procedure   $DUP,NEAR
         ASSUME  DS:NOTHING,ES:NOTHING
         context DS
-        invoke  Find_free_jfn
+        $INVOKE  Find_free_jfn
         JC      dup_no_free_handles
 
 dup_force:
         PUSH    ES
         PUSH    DI
-        invoke  Get_sf_from_jfn
+        $INVOKE  Get_sf_from_jfn
         POP     SI
         POP     DS
         JC      dup_bad_handle
@@ -545,11 +545,11 @@ BREAK <$DUP2 - force a dup on a particular jfn>
         XCHG    BX,CX                   ; BX < destination jfn
         PUSH    BX
         PUSH    CX
-        invoke  $CLOSE                  ; close BX
+        $INVOKE  $CLOSE                  ; close BX
         context DS
         POP     CX
         POP     BX
-        invoke  Get_jfn_pointer
+        $INVOKE  Get_jfn_pointer
         XCHG    BX,CX
         JNC     dup_force
 lseek_bad_handle:
@@ -598,12 +598,12 @@ chmod_try_file:
         OR      BYTE PTR ES:[BX].dir_attr,CL
         MOV     ES:[DI.BUFDIRTY],1
         MOV     AL,-1
-        invoke  FlushBuf
+        $INVOKE  FlushBuf
         transfer    SYS_RET_OK
 chmod_fetch:
         XOR     CX,CX
         MOV     CL,BYTE PTR ES:[BX].dir_attr
-        invoke  Get_user_stack
+        $INVOKE  Get_user_stack
         MOV     [SI.user_CX],CX
         transfer    SYS_RET_OK
 $chmod  ENDP
@@ -624,7 +624,7 @@ procedure   $CURRENT_DIR,NEAR
         PUSH    DS
         PUSH    BX
         PUSH    SI
-        invoke  $get_DPB
+        $INVOKE  $get_DPB
 ;
 ; ES:BP points to DPB.  DS:SI points to user stack, unless error
 ;
@@ -648,7 +648,7 @@ current_copy:
         PUSH    BX
         PUSH    DI
         MOV     [ATTRIB],attr_all
-        invoke  GETCURRDIR
+        $INVOKE  GETCURRDIR
         POP     DI
         POP     BX
 current_ok:
@@ -705,7 +705,7 @@ rename_check_dir:
         PUSH    WORD PTR [BX.dir_attr]
         PUSH    WORD PTR [ThisDrv]
         LDS     SI,[rename_dest]
-        invoke  GetPath
+        $INVOKE  GetPath
         POP     AX
         JC      rename_check_drives
 rename_bad_access:
@@ -724,7 +724,7 @@ rename_create:
         MOV     WORD PTR [Creating],0E5FFh
         MOV     WORD PTR [ThisFCB+2],SS
         MOV     WORD PTR [ThisFCB],OFFSET DOSGROUP:AUXStack-40
-        invoke  MakeNode
+        $INVOKE  MakeNode
         JC      rename_bad_access
         LDS     SI,[CurBuf]
         POP     AX
@@ -736,13 +736,13 @@ rename_create:
         POP     [BX.dir_date]
         MOV     [SI.BUFDIRTY],1
         LDS     SI,[rename_source]
-        invoke  GetPath
+        $INVOKE  GetPath
         LDS     SI,[CurBuf]
         MOV     BYTE PTR [BX],0E5h
         MOV     [SI.BUFDIRTY],1
         context DS
         MOV     AL,0FFh
-        invoke  FlushBuf
+        $INVOKE  FlushBuf
         transfer    SYS_RET_OK
 
 $RENAME ENDP
@@ -781,7 +781,7 @@ find_no_more:
 find_check_attr:
         MOV     DS,WORD PTR [CURBUF+2]
         MOV     CH,[BX.dir_attr]
-        invoke  MatchAttributes
+        $INVOKE  MatchAttributes
         JZ      found_it
         PUSH    [LastEnt]
         MOV     BX,[DirStart]
@@ -874,7 +874,7 @@ procedure   $FIND_NEXT,near
         MOV     DX,SI
         INC     DX
         PUSH    SI
-        invoke  MOVNAMENOSET
+        $INVOKE  MOVNAMENOSET
         POP     SI
         JNC     find_load
 findnext_no_more:
@@ -891,12 +891,12 @@ find_load:
         MOV     WORD PTR [ThisDPB],BP
         MOV     WORD PTR [ThisDPB+2],ES
 find_it_next:
-        invoke  SetDirSrch
+        $INVOKE  SetDirSrch
         ASSUME  DS:DOSGROUP
         POP     AX
         MOV     [ENTLAST],-1
-        invoke  GetEnt
-        invoke  NextEnt
+        $INVOKE  GetEnt
+        $INVOKE  NextEnt
         JMP     find_check
 $find_next  ENDP
 

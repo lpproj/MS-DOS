@@ -182,7 +182,7 @@ DSKROUT:
         TEST    [CNTCFLAG],-1
         JZ      DISPCALL
         PUSH    AX
-        invoke  DSKSTATCHK
+        $INVOKE  DSKSTATCHK
         POP     AX
 DISPCALL:
         PUSH    [LEAVEADDR]
@@ -454,7 +454,7 @@ $SET_CURRENT_PDB    ENDP
 ;
         procedure   $GET_CURRENT_PDB,NEAR
         ASSUME  DS:NOTHING,SS:NOTHING
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         PUSH    [CurrentPDB]
         POP     [SI.user_BX]
         return
@@ -523,11 +523,11 @@ ASSUME  SS:DOSGROUP
         PUSH    SS
         POP     DS
 ASSUME  DS:DOSGROUP
-        invoke  GETBP
+        $INVOKE  GETBP
         POP     DS
 ASSUME  DS:NOTHING
         JC      ILEAVE
-        invoke  DSKREAD
+        $INVOKE  DSKREAD
 TLEAVE:
         JZ      ILEAVE
 
@@ -576,11 +576,11 @@ ASSUME  SS:DOSGROUP
         PUSH    SS
         POP     DS
 ASSUME  DS:DOSGROUP
-        invoke  GETBP
+        $INVOKE  GETBP
         POP     DS
 ASSUME  DS:NOTHING
         JC      ILEAVE
-        invoke  DSKWRITE
+        $INVOKE  DSKWRITE
         JMP     TLEAVE
 ABSDWRT ENDP
 

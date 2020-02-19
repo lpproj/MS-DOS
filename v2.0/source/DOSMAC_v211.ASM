@@ -31,7 +31,7 @@ ENDM
 ;
 ; call a procedure that may be external. The call will be short.
 ;
-invoke MACRO name
+$INVOKE MACRO name
 .xcref
  IF2
  IFNDEF name

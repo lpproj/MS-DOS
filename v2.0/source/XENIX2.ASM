@@ -115,13 +115,13 @@ BREAK <get_sf_from_jfn - translate a jfn into sf pointer>
         procedure   get_sf_from_jfn,NEAR
         ASSUME  DS:DOSGROUP,ES:NOTHING
         PUSH    AX                      ; save him
-        invoke  get_jfn_pointer
+        $INVOKE  get_jfn_pointer
         JC      get_sf_jfn_invalid
         MOV     AL,ES:[DI]              ; get sfn
         CMP     AL,0FFh                 ; is it free?
         JZ      get_sf_jfn_invalid      ; yep... error
         XOR     AH,AH
-        invoke  get_sf_from_sfn         ; check this sfn out...
+        $INVOKE  get_sf_from_sfn         ; check this sfn out...
         JMP     SHORT get_sf_jfn_ret    ; condition codes are properly set
 
 get_sf_from_jfn ENDP
@@ -166,7 +166,7 @@ BREAK <$Close - release a handle>
 
         context DS
 
-        invoke  get_jfn_pointer         ; get jfn loc
+        $INVOKE  get_jfn_pointer         ; get jfn loc
         JNC     close_jfn
 close_bad_handle:
         error   error_invalid_handle
@@ -177,7 +177,7 @@ close_jfn:
         JE      close_bad_handle
         MOV     BYTE PTR ES:[DI],0FFh;
         XOR     AH,AH
-        invoke  get_sf_from_sfn
+        $INVOKE  get_sf_from_sfn
         JC      close_bad_handle
         PUSH    ES
         POP     DS
@@ -190,10 +190,10 @@ close_jfn:
         TEST    [DI.sf_fcb.fcb_DevID],devid_file_clean+devid_device
         JNZ     close_ok
         PUSH    WORD PTR [DI].sf_attr
-        invoke  MOVNAMENOSET
+        $INVOKE  MOVNAMENOSET
         POP     BX
         MOV     [Attrib],BL
-        invoke  FCB_CLOSE_INNER
+        $INVOKE  FCB_CLOSE_INNER
         CMP     AL,0FFh                 ; file not found error?
         JNZ     close_ok
         error   error_file_not_found
@@ -220,7 +220,7 @@ BREAK <PushDMA, PopDMA, ptr_normalize - set up local dma and save old>
         PUSH    ES
         PUSH    BX
         PUSH    PushSave
-        invoke  ptr_normalize           ; get new dma
+        $INVOKE  ptr_normalize           ; get new dma
         MOV     WORD PTR [DMAADD],DX    ; save IT!
         MOV     WORD PTR [DMAADD+2],DS
         MOV     ES,PushES
@@ -289,7 +289,7 @@ BREAK <$Read - Do file/device I/O>
         procedure   $Read,NEAR
         ASSUME  DS:NOTHING,ES:NOTHING
 
-        invoke  PushDMA
+        $INVOKE  PushDMA
         CALL    IO_setup
         JC      IO_err
         CMP     ES:[DI].sf_mode,open_for_write
@@ -297,17 +297,17 @@ BREAK <$Read - Do file/device I/O>
 IO_bad_mode:
         MOV     AL,read_access_denied
 IO_err:
-        invoke  PopDMA
+        $INVOKE  PopDMA
         transfer    SYS_RET_ERR
 
 read_setup:
-        invoke  $FCB_RANDOM_READ_BLOCK  ; do read
+        $INVOKE  $FCB_RANDOM_READ_BLOCK  ; do read
 IO_done:
-        invoke  get_user_stack          ; get old frame
+        $INVOKE  get_user_stack          ; get old frame
         MOV     AX,[SI].user_CX         ; get returned CX
         MOV     CX,xenix_count
         MOV     [SI].user_CX,CX         ; stash our CX
-        invoke  PopDMA                  ; get old DMA
+        $INVOKE  PopDMA                  ; get old DMA
         transfer    SYS_RET_OK
 $Read   ENDP
 
@@ -328,12 +328,12 @@ BREAK <$Write - Do file/device I/O>
         procedure   $Write,NEAR
         ASSUME  DS:NOTHING,ES:NOTHING
 
-        invoke  PushDMA
+        $INVOKE  PushDMA
         CALL    IO_setup
         JC      IO_err
         CMP     ES:[DI].sf_mode,open_for_read
         JE      IO_bad_mode
-        invoke  $FCB_RANDOM_WRITE_BLOCK ; do write
+        $INVOKE  $FCB_RANDOM_WRITE_BLOCK ; do write
         JMP     IO_done
 
 $write  ENDP
@@ -342,7 +342,7 @@ IO_setup:
         ASSUME  DS:NOTHING,ES:NOTHING
         context DS
         MOV     xenix_count,CX
-        invoke  Get_sf_from_jfn
+        $INVOKE  Get_sf_from_jfn
         ; ES:DI is sf pointer
         MOV     AL,read_invalid_handle          ;Assume an error
         MOV     CX,xenix_count
@@ -373,7 +373,7 @@ BREAK <$LSEEK - set random record field>
 
 lseek_get_sf:
         context DS
-        invoke  get_sf_from_jfn
+        $INVOKE  get_sf_from_jfn
         PUSH    ES
         POP     DS
         ASSUME  DS:NOTHING
@@ -407,13 +407,13 @@ lseek_beginning:
 lseek_ret:
         MOV     WORD PTR [DI+sf_fcb+fcb_RR],AX
         MOV     WORD PTR [DI+sf_fcb+fcb_RR+2],DX
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         MOV     [SI.user_DX],DX
         MOV     [SI.user_AX],AX
         transfer    SYS_RET_OK
 
 lseek_current:
-; ES:DI is pointer to sf... need to invoke  set random record for place
+; ES:DI is pointer to sf... need to $INVOKE  set random record for place
         XCHG    AX,DX               ; AX <- low
         XCHG    DX,CX               ; DX <- high
         ADD     AX,WORD PTR [DI+sf_fcb+fcb_RR]
@@ -450,7 +450,7 @@ BREAK <$IOCTL - return/set device dependent stuff>
         CMP     AL,3
         JA      ioctl_check_block       ;Block device
         PUSH    DX
-        invoke  get_sf_from_jfn
+        $INVOKE  get_sf_from_jfn
         POP     DX                      ;Restore DATA
         JNC     ioctl_check_permissions ; have valid handle
         error   error_invalid_handle
@@ -478,7 +478,7 @@ ioctl_read:
         LES     DI,DWORD PTR ES:[DI+sf_fcb+fcb_FIRCLUS]  ;Get device pointer
         MOV     AH,BYTE PTR ES:[DI.SDEVATT+1]   ;Get high byte
 ioctl_no_high:
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         MOV     DX,AX
         MOV     [SI.user_DX],DX
         transfer    SYS_RET_OK
@@ -505,10 +505,10 @@ ioctl_check_block:
 
 ioctl_get_status:
         PUSH    AX
-        invoke  GET_IO_FCB
+        $INVOKE  GET_IO_FCB
         POP     AX
         JC      ioctl_acc_err
-        invoke  IOFUNC
+        $INVOKE  IOFUNC
         MOV     AH,AL
         MOV     AL,0FFH
         JNZ     ioctl_status_ret
@@ -528,9 +528,9 @@ ioctl_get_dev:
         PUSH    AX
         PUSH    SI              ;DS in disguise
         MOV     AL,BL           ;Drive
-        invoke  GETTHISDRV
+        $INVOKE  GETTHISDRV
         JC      ioctl_bad_drv
-        invoke  FATREAD         ;"get" the drive
+        $INVOKE  FATREAD         ;"get" the drive
         MOV     BL,ES:[BP.dpb_UNIT]     ; Unit number
         LES     DI,ES:[BP.dpb_driver_addr]
         CLC                     ;Make sure error jump not taken
@@ -567,7 +567,7 @@ ASSUME  DS:NOTHING
         PUSH    SS
         POP     ES
         MOV     BX,OFFSET DOSGROUP:IOCALL       ;ES:BX -> Call header
-        invoke  DEVIOCALL2
+        $INVOKE  DEVIOCALL2
         MOV     AX,[IOSCNT]             ;Get actual bytes transferred
         transfer    SYS_RET_OK
 
@@ -607,7 +607,7 @@ filetimes_disp:
         JNZ     filetimes_set
         MOV     CX,ES:[DI.sf_fcb.fcb_FTIME]
         MOV     DX,ES:[DI.sf_fcb.fcb_FDATE]
-        invoke  Get_user_stack
+        $INVOKE  Get_user_stack
         MOV     [SI.user_CX],CX
         MOV     [SI.user_DX],DX
         transfer    SYS_RET_OK

@@ -72,11 +72,11 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         MOV     CX,6
         XOR     DX,DX
         MOV     AX,DX
-        invoke  SETREAD
+        $INVOKE  SETREAD
         PUSH    DS
         LDS     SI,[BCLOCK]
 ASSUME  DS:NOTHING
-        invoke  DEVIOCALL2      ;Get correct date and time
+        $INVOKE  DEVIOCALL2      ;Get correct date and time
         POP     DS
 ASSUME  DS:DOSGROUP
         POP     BX
@@ -183,21 +183,21 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         XOR     DX,DX
         MOV     AX,DX
         PUSH    BX
-        invoke  SETREAD
+        $INVOKE  SETREAD
 ASSUME  ES:DOSGROUP
         PUSH    DS
         LDS     SI,[BCLOCK]
 ASSUME  DS:NOTHING
-        invoke  DEVIOCALL2      ;Get correct date and time
+        $INVOKE  DEVIOCALL2      ;Get correct date and time
         POP     DS
         POP     BX
 ASSUME  DS:DOSGROUP
-        invoke  SETWRITE
+        $INVOKE  SETWRITE
         POP     WORD PTR [TIMEBUF]
         PUSH    DS
         LDS     SI,[BCLOCK]
 ASSUME  DS:NOTHING
-        invoke  DEVIOCALL2      ;Set the date
+        $INVOKE  DEVIOCALL2      ;Set the date
         POP     DS
 ASSUME  DS:DOSGROUP
         POP     BX

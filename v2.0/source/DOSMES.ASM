@@ -271,7 +271,7 @@ ESCFUNC LABEL   WORD
         PUBLIC OEMFunctionKey
 OEMFunctionKey  PROC    NEAR
         ASSUME  DS:NOTHING,ES:NOTHING,SS:DOSGROUP
-        invoke  $STD_CON_INPUT_NO_ECHO  ; Get the second byte of the sequence
+        $INVOKE  $STD_CON_INPUT_NO_ECHO  ; Get the second byte of the sequence
 
         IF NOT Rainbow
         MOV     CL,ESCTABLEN            ; length of table for scan
@@ -298,13 +298,13 @@ ENDM
 GoGetCh:
         transfer    GetCh               ; no, ignore sequence
 EatParm:
-        invoke  $STD_CON_INPUT_NO_ECHO  ; get argument
+        $INVOKE  $STD_CON_INPUT_NO_ECHO  ; get argument
         CMP     AL,'A'                  ; is it alphabetic arg?
         JAE     EatAlpha                ; yes, go snarf one up
         XOR     BP,BP                   ; init digit counter
         JMP     InDigit                 ; jump into internal eat digit routine
 EatNum:
-        invoke  $STD_CON_INPUT_NO_ECHO  ; get next digit
+        $INVOKE  $STD_CON_INPUT_NO_ECHO  ; get next digit
 InDigit:
         CMP     AL,'9'                  ; still a digit?
         JA      CheckNumEnd             ; no, go check for end char
@@ -340,7 +340,7 @@ EatAlpha:
         transferIf  'D',BackSp          ; LEFT
         JMP     GoGetCh
 EatPQRS:
-        invoke  $STD_CON_INPUT_NO_ECHO  ; eat char after O
+        $INVOKE  $STD_CON_INPUT_NO_ECHO  ; eat char after O
         JMP     GoGetCh
         ENDIF
 

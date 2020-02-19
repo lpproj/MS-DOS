@@ -20,7 +20,7 @@ CODERES SEGMENT PUBLIC
         EXTRN   LOADCOM:NEAR,CHKSUM:NEAR
 
         IF      IBMVER
-        EXTRN   EXECHK:NEAR,SYSCALL:NEAR
+        EXTRN   EXECHK:NEAR,$SYSCALL:NEAR
         ENDIF
 
 CODERES ENDS
@@ -224,7 +224,7 @@ IF IBMVER
         INT     int_command
         MOV     WORD PTR [SYS_CALL],BX
         MOV     WORD PTR [SYS_CALL+2],ES
-        MOV     DX,OFFSET RESGROUP:SYSCALL
+        MOV     DX,OFFSET RESGROUP:$SYSCALL
         MOV     AX,(Set_interrupt_vector SHL 8) + int_command
         INT     int_command
         POP     ES

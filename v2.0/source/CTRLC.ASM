@@ -64,7 +64,7 @@ ASSUME  DS:DOSGROUP
         MOV     BX,OFFSET DOSGROUP:DSKSTCALL
         LDS     SI,[BCON]
 ASSUME  DS:NOTHING
-        invoke  DEVIOCALL2
+        $INVOKE  DEVIOCALL2
         TEST    [DSKSTST],STBUI
         JNZ     ZRET                    ; No characters available
         MOV     AL,BYTE PTR [DSKCHRET]
@@ -77,7 +77,7 @@ DSK1:
         MOV     [DSKSTST],CX
         INC     CX
         MOV     [DSKSTCNT],CX
-        invoke  DEVIOCALL2              ; Eat the ^C
+        $INVOKE  DEVIOCALL2              ; Eat the ^C
         POP     SI
         POP     DS
         POP     BX                      ; Clean stack
@@ -123,20 +123,20 @@ SPOOLINT    ENDP
 
         procedure   STATCHK,NEAR
 
-        invoke  DSKSTATCHK              ; Allows ^C to be detected under
+        $INVOKE  DSKSTATCHK              ; Allows ^C to be detected under
                                         ; input redirection
         PUSH    BX
         XOR     BX,BX
-        invoke  GET_IO_FCB
+        $INVOKE  GET_IO_FCB
         POP     BX
         JC      RET18
         MOV     AH,1
-        invoke  IOFUNC
+        $INVOKE  IOFUNC
         JZ      SPOOLINT
         CMP     AL,'S'-'@'
         JNZ     NOSTOP
         XOR     AH,AH
-        invoke  IOFUNC                  ; Eat Cntrl-S
+        $INVOKE  IOFUNC                  ; Eat Cntrl-S
         JMP     SHORT PAUSOSTRT
 PRINTOFF:
 PRINTON:
@@ -147,16 +147,16 @@ PAUSOLP:
         CALL    SPOOLINT
 PAUSOSTRT:
         MOV     AH,1
-        invoke  IOFUNC
+        $INVOKE  IOFUNC
         JZ      PAUSOLP
 INCHK:
         PUSH    BX
         XOR     BX,BX
-        invoke  GET_IO_FCB
+        $INVOKE  GET_IO_FCB
         POP     BX
         JC      RET18
         XOR     AH,AH
-        invoke  IOFUNC
+        $INVOKE  IOFUNC
         CMP     AL,'P'-'@'
         JZ      PRINTON
         IF      NOT TOGLPRN
@@ -178,20 +178,20 @@ STATCHK ENDP
 ; unchanged and RET (not IRET) with carry CLEAR.  If carry is SET then
 ; an terminate system call is simulated.
         MOV     AL,3                ; Display "^C"
-        invoke  BUFOUT
-        invoke  CRLF
+        $INVOKE  BUFOUT
+        $INVOKE  CRLF
         PUSH    SS
         POP     DS
 ASSUME  DS:DOSGROUP
         CMP     BYTE PTR [CONSWAP],0
         JZ      NOSWAP
-        invoke  SWAPBACK
+        $INVOKE  SWAPBACK
 NOSWAP:
         CLI                         ; Prepare to play with stack
         MOV     SP,[user_SP]
         MOV     SS,[user_SS]        ; User stack now restored
 ASSUME  SS:NOTHING
-        invoke  restore_world       ; User registers now restored
+        $INVOKE  restore_world       ; User registers now restored
 ASSUME  DS:NOTHING
         MOV     BYTE PTR [INDOS],0  ; Go to known state
         MOV     BYTE PTR [ERRORMODE],0
@@ -260,7 +260,7 @@ ASSUME  DS:DOSGROUP
         MOV     WORD PTR [DskChRet+1],SI    ; transfer address (need an EQU)
         LDS     SI,[BCON]
 ASSUME  DS:NOTHING
-        invoke  DEVIOCALL2
+        $INVOKE  DEVIOCALL2
         MOV     WORD PTR [DskChRet+1],OFFSET DOSGROUP:DevIOBuf
         MOV     [DskStCnt],1
         return
@@ -372,7 +372,7 @@ error_abort:
 ASSUME  DS:DOSGROUP
         CMP     BYTE PTR [CONSWAP],0
         JZ      NOSWAP2
-        invoke  SWAPBACK
+        $INVOKE  SWAPBACK
 NOSWAP2:
         MOV     BYTE PTR [exit_Type],Exit_hard_error
         MOV     DS,[CurrentPDB]
@@ -391,7 +391,7 @@ ASSUME  DS:NOTHING
         PUSH    DS                      ; save PDB of process
 
         MOV     AL,int_Terminate
-        invoke  $Get_interrupt_vector   ; and who to go to
+        $INVOKE  $Get_interrupt_vector   ; and who to go to
         MOV     WORD PTR [EXITHOLD+2],ES ; save return address
         MOV     WORD PTR [EXITHOLD],BX
 
@@ -412,7 +412,7 @@ ASSUME  DS:NOTHING
         CMP     BYTE PTR [exit_type],Exit_keep_process
         JZ      reset_to_parent         ; keeping this process
 
-        invoke  arena_free_process
+        $INVOKE  arena_free_process
 
         ; reset environment at [CurrentPDB]; close those handles
         MOV     CX,FilPerProc
@@ -421,7 +421,7 @@ reset_free_jfn:
         MOV     BX,CX
         PUSH    CX
         DEC     BX                      ; get jfn
-        invoke  $CLOSE                  ; close it, ignore return
+        $INVOKE  $CLOSE                  ; close it, ignore return
         POP     CX
         LOOP    reset_free_jfn          ; and do 'em all
 
@@ -433,7 +433,7 @@ reset_return:                           ; come here for normal return
         POP     DS
         ASSUME  DS:DOSGROUP
         MOV     AL,-1
-        invoke  FLUSHBUF                ; make sure that everything is clean
+        $INVOKE  FLUSHBUF                ; make sure that everything is clean
 
         CLI
         MOV     BYTE PTR [INDOS],0               ;Go to known state
@@ -447,7 +447,7 @@ reset_return:                           ; come here for normal return
         MOV     SP,WORD PTR DS:[PDB_user_stack]
 
         ASSUME  SS:NOTHING
-        invoke  restore_world
+        $INVOKE  restore_world
         ASSUME  ES:NOTHING
         POP     AX                      ; suck off CS:IP of interrupt...
         POP     AX

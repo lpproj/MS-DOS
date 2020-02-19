@@ -74,7 +74,7 @@ keep_shrink:
         MOV     BX,DX
         PUSH    BX
         PUSH    ES
-        invoke  $SETBLOCK               ; ignore return codes.
+        $INVOKE  $SETBLOCK               ; ignore return codes.
         POP     DS
         POP     BX
         JC      keep_done               ; failed on modification
@@ -118,7 +118,7 @@ PAGE
         MOV     BYTE PTR [Exit_type],exit_ctrl_c
 
 Exit_inner:
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         PUSH    [CurrentPDB]
         POP     [SI.user_CS]
         transfer    abort_inner

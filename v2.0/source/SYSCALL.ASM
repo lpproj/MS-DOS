@@ -51,10 +51,10 @@ ASSUME  DS:NOTHING,ES:NOTHING
         PUSH    SS
         POP     DS
 ASSUME  DS:DOSGROUP
-        invoke  READTIME        ;Check for rollover to next day
+        $INVOKE  READTIME        ;Check for rollover to next day
         MOV     AX,[YEAR]
         MOV     BX,WORD PTR [DAY]
-        invoke  get_user_stack           ;Get pointer to user registers
+        $INVOKE  get_user_stack           ;Get pointer to user registers
 ASSUME  DS:NOTHING
         MOV     [SI.user_DX],BX  ;DH=month, DL=day
         ADD     AX,1980         ;Put bias back
@@ -87,7 +87,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
         PUSH    SS
         POP     DS
 ASSUME  DS:DOSGROUP
-        invoke  DODATE
+        $INVOKE  DODATE
 RET24:  RET
 $SET_DATE ENDP
 
@@ -104,8 +104,8 @@ ASSUME  DS:NOTHING,ES:NOTHING
         PUSH    SS
         POP     DS
 ASSUME  DS:DOSGROUP
-        invoke  READTIME
-        invoke  get_user_stack           ;Get pointer to user registers
+        $INVOKE  READTIME
+        $INVOKE  get_user_stack           ;Get pointer to user registers
         MOV     [SI.user_DX],DX
         MOV     [SI.user_CX],CX
         XOR     AL,AL
@@ -142,21 +142,21 @@ ASSUME  DS:DOSGROUP
         XOR     DX,DX
         MOV     AX,DX
         PUSH    BX
-        invoke  SETREAD
+        $INVOKE  SETREAD
 ASSUME  ES:DOSGROUP
         PUSH    DS
         LDS     SI,[BCLOCK]
 ASSUME  DS:NOTHING
-        invoke  DEVIOCALL2      ;Get correct day count
+        $INVOKE  DEVIOCALL2      ;Get correct day count
         POP     DS
 ASSUME  DS:DOSGROUP
         POP     BX
-        invoke  SETWRITE
+        $INVOKE  SETWRITE
         POP     WORD PTR [TIMEBUF+4]
         POP     WORD PTR [TIMEBUF+2]
         LDS     SI,[BCLOCK]
 ASSUME  DS:NOTHING
-        invoke  DEVIOCALL2      ;Set the time
+        $INVOKE  DEVIOCALL2      ;Set the time
         XOR     AL,AL
         RET
 $SET_TIME ENDP
@@ -176,8 +176,8 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;       AL = 2 No room at disk transfer address
 ;       AL = 0 All OK
 
-        invoke  GETREC
-        invoke  LOAD
+        $INVOKE  GETREC
+        $INVOKE  LOAD
         JMP     SHORT FINSEQ
 
     entry   $FCB_SEQ_WRITE              ; System call 21
@@ -192,8 +192,8 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;       AL = 2 No room in disk transfer segment
 ;       AL = 0 All OK
 
-        invoke  GETREC
-        invoke  STORE
+        $INVOKE  GETREC
+        $INVOKE  STORE
 FINSEQ:
         JCXZ    SETNREX
         ADD     AX,1
@@ -214,8 +214,8 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;       AL = 2 No room at disk transfer address
 ;       AL = 0 All OK
 
-        invoke  GETRRPOS1
-        invoke  LOAD
+        $INVOKE  GETRRPOS1
+        $INVOKE  LOAD
         JMP     SHORT FINRND
 
     entry   $FCB_RANDOM_WRITE               ; System call 34
@@ -231,8 +231,8 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;       AL = 2 No room in disk transfer segment
 ;       AL = 0 All OK
 
-        invoke  GETRRPOS1
-        invoke  STORE
+        $INVOKE  GETRRPOS1
+        $INVOKE  STORE
         JMP     SHORT FINRND
 
     entry   $FCB_RANDOM_READ_BLOCK          ; System call 39
@@ -251,8 +251,8 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;       AL = 0 All OK
 ;       CX = Actual number of records read
 
-        invoke  GETRRPOS
-        invoke  LOAD
+        $INVOKE  GETRRPOS
+        $INVOKE  LOAD
         JMP     SHORT FINBLK
 
     entry   $FCB_RANDOM_WRITE_BLOCK         ; System call 40
@@ -271,10 +271,10 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;       AL = 0 All OK
 ;       CX = Actual number of records written
 
-        invoke  GETRRPOS
-        invoke  STORE
+        $INVOKE  GETRRPOS
+        $INVOKE  STORE
 FINBLK:
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         MOV     [SI.user_CX],CX
         entry   FINNOSAV
         JCXZ    FINRND
@@ -313,7 +313,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ; Returns:
 ;       AL = -1 if no entries matched, otherwise 0
 
-        invoke  MOVNAME
+        $INVOKE  MOVNAME
 ASSUME  ES:DOSGROUP
         MOV     AL,-1
         MOV     BYTE PTR [FoundDel],AL
@@ -331,7 +331,7 @@ ASSUME  ES:DOSGROUP
         JNZ     NOTALL
         MOV     BYTE PTR [DELALL],0           ; DEL *.* - flag deleting all
 NOTALL:
-        invoke  FINDNAME
+        $INVOKE  FINDNAME
 ASSUME  DS:DOSGROUP
         MOV     AL,-1
         JC      RET4
@@ -360,10 +360,10 @@ ASSUME  DS:DOSGROUP
         JZ      DELNXT
         CMP     BX,ES:[BP.dpb_max_cluster]
         JA      DELNXT
-        invoke  RELEASE
+        $INVOKE  RELEASE
 DELNXT:
-        invoke  GETENTRY                        ; Registers need to be reset
-        invoke  NEXTENT
+        $INVOKE  GETENTRY                        ; Registers need to be reset
+        $INVOKE  NEXTENT
         JNC     DELFILE
         CALL    FLUSHRET1
         MOV     AL,BYTE PTR [FoundDel]
@@ -386,14 +386,14 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ; Returns:
 ;       AL = -1 if no entries matched, otherwise 0
 
-        invoke  MOVNAME
+        $INVOKE  MOVNAME
 ASSUME  ES:DOSGROUP
         JC      ERRETJ
         ADD     SI,5
         MOV     DI,OFFSET DOSGROUP:NAME2
-        invoke  LODNAME
+        $INVOKE  LODNAME
         JC      ERRETJ          ; Report error if second name invalid
-        invoke  FINDNAME
+        $INVOKE  FINDNAME
 ASSUME  DS:DOSGROUP
         JC      ERRETJ
         OR      AH,AH           ; Check if I/O device name
@@ -421,15 +421,15 @@ NOCHG:
         INC     DI
         MOV     BYTE PTR [DI],attr_all  ;Sets ATTRIB
                                 ; Stop duplicates with any attributes
-        invoke  DEVNAME         ; Check if giving it a device name
+        $INVOKE  DEVNAME         ; Check if giving it a device name
         JNC     RENERR
         XOR     AX,AX
         PUSH    [LASTENT]
-        invoke  FINDENTRY       ; See if new name already exists
+        $INVOKE  FINDENTRY       ; See if new name already exists
         POP     AX
         JNC     RENERR                  ; Error if found
         LES     BP,[THISDPB]
-        invoke  GETENT                  ; Re-read matching entry
+        $INVOKE  GETENT                  ; Re-read matching entry
         MOV     DI,BX           ; Leave BX,DX until call to NEXTENT
         MOV     ES,WORD PTR [CURBUF+2]
         MOV     SI,OFFSET DOSGROUP:NAME1
@@ -443,7 +443,7 @@ NOCHG:
         MOV     DI,OFFSET DOSGROUP:NAME1
         MOV     CX,13                   ; Include attribute byte
         REP     MOVSB                   ; Copy name back into search buffer
-        invoke  NEXTENT
+        $INVOKE  NEXTENT
         JNC     RENFIL
         JMP     FLUSHRET1
 
@@ -468,7 +468,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ; FOR INTERNAL USE
 ;       [CURBUF+2]:SI and [CURBUF+2]:BX Preserved
 
-        invoke  GETFILE
+        $INVOKE  GETFILE
 ASSUME  DS:DOSGROUP,ES:NOTHING
 
     entry   DOOPEN
@@ -567,7 +567,7 @@ NORMFCB3:
         TEST    [DI.fcb_DEVID],devid_file_clean+devid_device
                                         ; Allow only dirty files
         JNZ     OKRET1                  ; can't close I/O device or not written
-        invoke  MOVNAMENOSET
+        $INVOKE  MOVNAMENOSET
         JC      BADCLOSE                ; Bad file name
         entry   FCB_CLOSE_INNER
         PUSH    DX
@@ -580,10 +580,10 @@ NORMFCB3:
         PUSH    SS
         POP     DS
 ASSUME  DS:DOSGROUP
-        invoke  FATREAD
+        $INVOKE  FATREAD
         POP     BX
-        invoke  SETDIRSRCH
-        invoke  FINDENTRY
+        $INVOKE  SETDIRSRCH
+        $INVOKE  FINDENTRY
         POP     ES
         POP     DI
         JC      BADCLOSE
@@ -610,7 +610,7 @@ ASSUME  DS:DOSGROUP
 FLUSHRET1:
         LES     BP,[THISDPB]
         MOV     AL,ES:[BP.dpb_drive]
-        invoke  FLUSHBUF
+        $INVOKE  FLUSHBUF
 OKRET1:
         XOR     AL,AL
         RET
@@ -633,7 +633,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ; Returns:
 ;       AL = -1 if file cannot be created, otherwise 0
 
-        invoke  MOVNAME
+        $INVOKE  MOVNAME
 ASSUME  ES:DOSGROUP
         JC      ERRET3
         MOV     DI,OFFSET DOSGROUP:NAME1
@@ -644,15 +644,15 @@ ASSUME  ES:DOSGROUP
         MOV     BYTE PTR [CREATING],-1
         PUSH    DX
         PUSH    DS
-        invoke  FINDNAME
+        $INVOKE  FINDNAME
 ASSUME  DS:DOSGROUP
 NWENTY:
         LES     BP,[THISDPB]
 ASSUME  ES:NOTHING
         JNC     EXISTENT
-        invoke  BUILDDIR
+        $INVOKE  BUILDDIR
         JC      ERRPOP
-        invoke  GETENT          ; Point at that free entry
+        $INVOKE  GETENT          ; Point at that free entry
         JMP     SHORT FREESPOT
 ERRPOP:
         POP     DS
@@ -689,10 +689,10 @@ ASSUME  DS:DOSGROUP
         PUSH    BX
         PUSH    SI              ; Save sector number
         MOV     BX,CX
-        invoke  RELEASE         ; Free any data already allocated
+        $INVOKE  RELEASE         ; Free any data already allocated
         POP     DX
         XOR     AL,AL
-        invoke  GETBUFFR
+        $INVOKE  GETBUFFR
         POP     BX
         ADD     BX,WORD PTR [CURBUF]
 FREESPOT:
@@ -712,7 +712,7 @@ NOTVOLID:
         MOV     CL,5
         XOR     AX,AX
         REP     STOSW
-        invoke  DATE16
+        $INVOKE  DATE16
         XCHG    AX,DX
         STOSW
         XCHG    AX,DX
@@ -728,7 +728,7 @@ NOTVOLID:
         MOV     AL,ES:[BP.dpb_drive]
         PUSH    AX
         PUSH    BX
-        invoke  FLUSHBUF
+        $INVOKE  FLUSHBUF
         POP     BX
         POP     AX
         POP     SI

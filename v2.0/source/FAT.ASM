@@ -65,7 +65,7 @@ HURTFAT:
         PUSH    AX
         MOV     AH,80H          ; Signal Bad FAT to INT int_fatal_abort handler
         MOV     DI,0FFFH        ; In case INT int_fatal_abort returns (it shouldn't)
-        invoke  FATAL
+        $INVOKE  FATAL
         POP     AX              ; Try to ignore bad FAT
         return
 UNPACK  ENDP
@@ -121,7 +121,7 @@ ASSUME  DS:DOSGROUP
         MOV     DX,[CLUSSEC]
         MOV     SI,1
         XOR     AL,AL
-        invoke  GETBUFFRB
+        $INVOKE  GETBUFFRB
         LDS     DI,[CURBUF]
 ASSUME  DS:NOTHING
         MOV     [DI.BUFDIRTY],1
@@ -173,7 +173,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         MOV     DX,AX
         XOR     AL,AL
         MOV     SI,1
-        invoke  GETBUFFRB
+        $INVOKE  GETBUFFRB
         LDS     SI,[CURBUF]
 ASSUME  DS:NOTHING
         LEA     DI,[SI.BufInSiz]
@@ -193,7 +193,7 @@ ASSUME  DS:DOSGROUP
         INC     DX
         XOR     AL,AL
         MOV     SI,1
-        invoke  GETBUFFRB
+        $INVOKE  GETBUFFRB
         LDS     SI,[CURBUF]
 ASSUME  DS:NOTHING
         LEA     DI,[SI.BufInSiz]
@@ -222,7 +222,7 @@ FATERR:
         AND     DI,STECODE      ; Put error code in DI
         MOV     AH,2            ; While trying to read FAT
         MOV     AL,BYTE PTR [THISDRV]    ; Tell which drive
-        invoke  FATAL1
+        $INVOKE  FATAL1
 
         entry   FATREAD
 ASSUME  DS:DOSGROUP,ES:NOTHING
@@ -235,7 +235,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
 ; All other registers destroyed
 
         MOV     AL,BYTE PTR [THISDRV]
-        invoke  GETBP
+        $INVOKE  GETBP
         MOV     AL,DMEDHL
         MOV     AH,ES:[BP.dpb_UNIT]
         MOV     WORD PTR [DEVCALL],AX
@@ -249,7 +249,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         LDS     SI,ES:[BP.dpb_driver_addr]       ; DS:SI Points to device header
 ASSUME  DS:NOTHING
         POP     ES                      ; ES:BX Points to call header
-        invoke  DEVIOCALL2
+        $INVOKE  DEVIOCALL2
         PUSH    SS
         POP     DS
 ASSUME  DS:DOSGROUP
@@ -276,15 +276,15 @@ NBUFFER:                        ; Look for dirty buffers
         JNZ     NBUFFER
 ; If no dirty buffers, assume Media changed
 NEWDSK:
-        invoke  SETVISIT
+        $INVOKE  SETVISIT
 NXBUFFER:
         MOV     [DI.VISIT],1
         CMP     AL,[DI.BUFDRV]       ; For this drive?
         JNZ     SKPBUFF
         MOV     WORD PTR [DI.BUFDRV],00FFH  ; Free up buffer
-        invoke  SCANPLACE
+        $INVOKE  SCANPLACE
 SKPBUFF:
-        invoke  SKIPVISIT
+        $INVOKE  SKIPVISIT
         JNZ     NXBUFFER
         LDS     DI,ES:[BP.dpb_driver_addr]
         TEST    [DI.SDEVATT],ISFATBYDEV
@@ -299,7 +299,7 @@ ASSUME  DS:NOTHING
         PUSH    ES                      ; Get a free buffer for BIOS to use
         PUSH    BP
         LDS     DI,[BUFFHEAD]
-        invoke  BUFWRITE
+        $INVOKE  BUFWRITE
         POP     BP
         POP     ES
 GOTGETBUF:
@@ -325,7 +325,7 @@ ASSUME  DS:DOSGROUP
         POP     DS                      ; DS:SI Points to device header
 ASSUME  DS:NOTHING
         POP     ES                      ; ES:BX Points to call header
-        invoke  DEVIOCALL2
+        $INVOKE  DEVIOCALL2
         POP     ES                      ; Restore ES:BP
         PUSH    SS
         POP     DS
@@ -338,7 +338,7 @@ ASSUME  DS:DOSGROUP
 ASSUME  DS:NOTHING
         CMP     AL,BYTE PTR [SI.BPMEDIA]
         JZ      DPBOK
-        invoke  $SETDPB
+        $INVOKE  $SETDPB
         LDS     DI,[CALLXAD]            ; Get back buffer pointer
         MOV     AL,BYTE PTR ES:[BP.dpb_FAT_count]
         MOV     AH,BYTE PTR ES:[BP.dpb_FAT_size]

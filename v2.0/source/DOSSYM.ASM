@@ -866,7 +866,8 @@ SETBLOCK                        EQU 74  ; 74     4A
 ;    Process Group
 EXEC                            EQU 75  ; 75     4B
 EXIT                            EQU 76  ; 76     4C
-WAIT                            EQU 77  ; 77     4D
+;WAIT                            EQU 77  ; 77     4D
+GET_RETURN_CODE                 EQU 77  ; 77     4D
 FIND_FIRST                      EQU 78  ; 78     4E
 ;   Special Group
 FIND_NEXT                       EQU 79  ; 79     4F

@@ -140,7 +140,7 @@ CODERES SEGMENT PUBLIC
         PUBLIC  SAVHAND
 
         IF      IBMVER
-        PUBLIC  EXECHK,SYSCALL,EXEC_WAIT
+        PUBLIC  EXECHK,$SYSCALL,EXEC_WAIT
         ENDIF
 
 ASSUME  CS:RESGROUP,DS:NOTHING,ES:NOTHING,SS:NOTHING
@@ -160,7 +160,7 @@ PROGSTART:
 RSTACK  LABEL   WORD
 
 IF IBMVER
-SYSCALL:
+$SYSCALL:
         CMP     AH,EXEC
         JZ      do_exec
         JMP     DWORD PTR [SYS_CALL]
@@ -313,7 +313,7 @@ EXT_EXEC:
         INT     int_command     ; Do the EXEC
         JC      EXEC_ERR        ; EXEC failed
 EXEC_WAIT:
-        MOV     AH,WAIT
+        MOV     AH,GET_RETURN_CODE
         INT     int_command     ; Get the return code
         MOV     [RETCODE],AX
 NOEXEC:

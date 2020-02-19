@@ -3,7 +3,7 @@ TITLE   COMMAND Language midifiable Code Transient
 
 .xlist
 .xcref
-        INCLUDE DOSSYM.ASM
+        INCLUDE DOSSYMV2.ASM
         INCLUDE DEVSYM.ASM
         INCLUDE COMSEG.ASM
         INCLUDE COMSW.ASM
@@ -30,13 +30,13 @@ TRANSPACE       ENDS
 TRANCODE        SEGMENT PUBLIC BYTE
 
         EXTRN   PRINT:NEAR,SCANOFF:NEAR,CRLF2:NEAR,RESTUDIR:NEAR,CERROR:NEAR
-        EXTRN   CRPRINT:NEAR,OUT:NEAR,ZPRINT:NEAR
+        EXTRN   CRPRINT:NEAR,OUT1:NEAR,ZPRINT:NEAR
         EXTRN   ERROR_PRINT:NEAR,MesTran:NEAR,P_Date:NEAR
 
         IF      KANJI
         EXTRN   TESTKANJ:NEAR
         ENDIF
-        PUBLIC  NOTEST2,ECHO,CNTRLC,VERIFY,PRINTVOL,GetDate,PRINT_DATE
+        PUBLIC  NOTEST2,$ECHO,CNTRLC,VERIFY,PRINTVOL,GetDate,PRINT_DATE
 
 ASSUME  CS:TRANGROUP,DS:TRANGROUP,ES:TRANGROUP,SS:NOTHING
 
@@ -91,7 +91,7 @@ RETERA:
 ;************************************************
 ; ECHO, BREAK, and VERIFY commands. Check for "ON" and "OFF"
 
-ECHO:
+$ECHO:
 ASSUME  DS:TRANGROUP,ES:TRANGROUP
         CALL    ON_OFF
         JC      DOEMES
@@ -229,7 +229,7 @@ PRINTVOL:
         MOV     AL,[CURDRV]
         ADD     AL,'A'
 DRVOK:
-        CALL    OUT
+        CALL    OUT1
         POP     AX
         OR      AL,AL
         JZ      GOODVOL

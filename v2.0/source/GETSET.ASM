@@ -87,7 +87,7 @@ ASSUME  DS:DOSGROUP
         MOV     BX,[USERNUM + 2]
         MOV     CX,[USERNUM]
         MOV     AX,[MSVERS]
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
 ASSUME  DS:NOTHING
         MOV     [SI.user_BX],BX
         MOV     [SI.user_CX],CX
@@ -222,7 +222,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 
         OR      AL,AL
         JNZ     CTRL_C_set
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         MOV     AL,[CNTCFLAG]
         MOV     BYTE PTR [SI.user_DX],AL
         return
@@ -248,7 +248,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ; Returns:
 ;       Flag location in ES:BX
 
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         MOV     [SI.user_BX],OFFSET DOSGROUP:INDOS
         MOV     [SI.user_ES],SS
         return
@@ -261,7 +261,7 @@ $GET_INDOS_FLAG ENDP
 ; Return a pointer to interesting DOS variables This call is version
 ; dependent and is subject to change without notice in future versions.
 ; Use at risk.
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         MOV     [SI.user_BX],OFFSET DOSGROUP:SYSINITVAR
         MOV     [SI.user_ES],SS
         return
@@ -291,17 +291,17 @@ ASSUME  DS:NOTHING,ES:NOTHING
         POP     DS
 ASSUME  DS:DOSGROUP
         MOV     AL,DL
-        invoke  GETTHISDRV
+        $INVOKE  GETTHISDRV
         MOV     AX,-1
         JC      BADFRDRIVE
-        invoke  FATREAD
+        $INVOKE  FATREAD
         XOR     DX,DX
         MOV     BX,2
         MOV     CX,ES:[BP.dpb_max_cluster]
         DEC     CX
         PUSH    CX              ; Save Total
 SCANFREE:
-        invoke  UNPACK
+        $INVOKE  UNPACK
         JNZ     NOTFREECLUS
         INC     DX
 NOTFREECLUS:
@@ -313,7 +313,7 @@ NOTFREECLUS:
         XOR     AH,AH
         MOV     CX,ES:[BP.dpb_sector_size]
 BADFRDRIVE:
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
 ASSUME  DS:NOTHING
         MOV     [SI. user_CX],CX
         MOV     [SI.user_DX],BX
@@ -336,7 +336,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 
         MOV     BX,WORD PTR [DMAADD]
         MOV     CX,WORD PTR [DMAADD+2]
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         MOV     [SI.user_BX],BX
         MOV     [SI.user_ES],CX
         return
@@ -378,10 +378,10 @@ ASSUME  DS:NOTHING,ES:NOTHING
         POP     DS
 ASSUME  DS:DOSGROUP
         MOV     AL,DL
-        invoke  GETTHISDRV
+        $INVOKE  GETTHISDRV
         JC      ISNODRV
-        invoke  FATREAD
-        invoke  get_user_stack
+        $INVOKE  FATREAD
+        $INVOKE  get_user_stack
 ASSUME  DS:NOTHING
         MOV     [SI.user_BX],BP
         MOV     [SI.user_DS],ES
@@ -443,7 +443,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 
         CALL    RECSET
         LES     BX,DWORD PTR ES:[BX]
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         MOV     [SI.user_BX],BX
         MOV     [SI.user_ES],ES
         return
@@ -544,7 +544,7 @@ char_oper_bad_ret:
         MOV     AL,0FFh
         return
 char_oper_ret:
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         MOV     [SI.user_DX],DX
         return
 $CHAR_OPER  ENDP

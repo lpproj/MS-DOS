@@ -77,7 +77,7 @@ FINDIT:
         POP     ES
         JCXZ    RET10
 entry   SKPCLP
-        invoke  UNPACK
+        $INVOKE  UNPACK
         CMP     DI,0FF8H
         JAE     RET10
         XCHG    BX,DI
@@ -117,7 +117,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         MOV     DX,[CLUSNUM]
         MOV     BL,[SECCLUSPOS]
         CALL    FIGREC
-        invoke  GETBUFFR
+        $INVOKE  GETBUFFR
         MOV     BYTE PTR [TRANS],1      ; A transfer is taking place
         MOV     SI,[NEXTADD]
         MOV     DI,SI
@@ -155,10 +155,10 @@ EVENRD:
         LDS     DI,[CURBUF]
         LEA     BX,[DI.BufInSiz]
         SUB     SI,BX                   ; Position in buffer
-        invoke  PLACEBUF
+        $INVOKE  PLACEBUF
         CMP     SI,ES:[BP.dpb_sector_size]
         JB      RBUFPLACED
-        invoke  PLACEHEAD
+        $INVOKE  PLACEHEAD
 RBUFPLACED:
         PUSH    SS
         POP     DS
@@ -195,10 +195,10 @@ EVENWRT:
         SUB     DI,SI                   ; Position in buffer
         MOV     SI,DI
         MOV     DI,BX
-        invoke  PLACEBUF
+        $INVOKE  PLACEBUF
         CMP     SI,ES:[BP.dpb_sector_size]
         JB      WBUFPLACED
-        invoke  PLACEHEAD
+        $INVOKE  PLACEHEAD
 WBUFPLACED:
         PUSH    SS
         POP     DS
@@ -222,7 +222,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         MOV     BX,[CLUSNUM]
         CMP     BX,0FF8H
         JAE     NONEXT
-        invoke  UNPACK
+        $INVOKE  UNPACK
         MOV     [CLUSNUM],DI
         INC     [LASTPOS]
         MOV     AL,0
@@ -273,7 +273,7 @@ OPTCLUS:
 ; DX has number of sectors left to transfer
 ; ES:BP Points to DPB
 ; ES:SI has FAT pointer
-        invoke  UNPACK
+        $INVOKE  UNPACK
         ADD     CL,AL
         ADC     CH,0
         CMP     CX,DX
@@ -297,7 +297,7 @@ FINCLUS:
         SUB     BX,DX           ; Number of new clusters accessed
         ADD     [LASTPOS],BX
         POP     BX              ; BL = sector postion within cluster
-        invoke  FIGREC
+        $INVOKE  FIGREC
         MOV     BX,SI
         return
 BLKDON:
@@ -388,7 +388,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
 
         PUSH    BX                      ; save the fat byte
         XOR     BX,BX
-        invoke  UNPACK
+        $INVOKE  UNPACK
         MOV     [FATBYT],DI
         POP     BX
 
@@ -406,11 +406,11 @@ FINDFRE:
         JG      TRYIN
         POP     BX
         MOV     DX,0FFFH
-        invoke  RELBLKS
+        $INVOKE  RELBLKS
         POP     AX              ; No. of clusters requested
         SUB     AX,CX           ; AX=No. of clusters allocated
         POP     DX
-        invoke  RESTFATBYT
+        $INVOKE  RESTFATBYT
         INC     DX              ; Position of first cluster allocated
         ADD     AX,DX           ; AX=max no. of cluster in file
         MOV     DL,ES:[BP.dpb_cluster_mask]
@@ -426,29 +426,29 @@ MAXREC:
         return
 
 TRYOUT:
-        invoke  UNPACK
+        $INVOKE  UNPACK
         JZ      HAVFRE
 TRYIN:
         DEC     AX
         JLE     FINDFRE
         XCHG    AX,BX
-        invoke  UNPACK
+        $INVOKE  UNPACK
         JZ      HAVFRE
         XCHG    AX,BX
         JMP     SHORT FINDFRE
 HAVFRE:
         XCHG    BX,DX
         MOV     AX,DX
-        invoke  PACK
+        $INVOKE  PACK
         MOV     BX,AX
         LOOP    CLUSALLOC
         MOV     DX,0FFFH
-        invoke  PACK
+        $INVOKE  PACK
         POP     BX
         POP     CX              ; Don't need this stuff since we're successful
         POP     DX
-        invoke  UNPACK
-        invoke  RESTFATBYT
+        $INVOKE  UNPACK
+        $INVOKE  RESTFATBYT
         XCHG    BX,DI
         OR      DI,DI
         retnz
@@ -470,7 +470,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
         PUSH    DI
         XOR     BX,BX
         MOV     DX,[FATBYT]
-        invoke  PACK
+        $INVOKE  PACK
         POP     DI
         POP     DX
         POP     BX
@@ -493,10 +493,10 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
 entry   RELBLKS
 ; Enter here with DX=0FFFH to put an end-of-file mark
 ; in the first cluster and free the rest in the chain.
-        invoke  UNPACK
+        $INVOKE  UNPACK
         retz
         MOV     AX,DI
-        invoke  PACK
+        $INVOKE  PACK
         CMP     AX,0FF8H
         MOV     BX,AX
         JB      RELEASE
@@ -516,7 +516,7 @@ ASSUME  DS:DOSGROUP,ES:NOTHING
 ;       BX = Last cluster in the file
 ; DI destroyed. No other registers affected.
 
-        invoke  UNPACK
+        $INVOKE  UNPACK
         CMP     DI,0FF8H
         JAE     RET12
         MOV     BX,DI

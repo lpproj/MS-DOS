@@ -58,14 +58,14 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;               Node already exists
 ;               Device name given
 ;               Disk or directory(root) full
-        invoke  validate_path
+        $INVOKE  validate_path
         JC      MKNERRJ
         MOV     SI,DX
         MOV     WORD PTR [THISFCB+2],SS
         MOV     WORD PTR [THISFCB],OFFSET DOSGROUP:AUXSTACK-40  ; Scratch space
         MOV     AL,attr_directory
         MOV     WORD PTR [CREATING],0E500h
-        invoke  MAKENODE
+        $INVOKE  MAKENODE
 ASSUME  DS:DOSGROUP
         MOV     AL,mkdir_path_not_found
         JC      MKNERRJ
@@ -81,24 +81,24 @@ ASSUME  DS:DOSGROUP
         PUSH    [DIRSTART]      ; Parent for .. entry
         XOR     AX,AX
         MOV     [DIRSTART],AX   ; Null directory
-        invoke  NEWDIR
+        $INVOKE  NEWDIR
         JC      NODEEXISTSPOPDEL    ; No room
-        invoke  GETENT          ; First entry
+        $INVOKE  GETENT          ; First entry
         LES     DI,[CURBUF]
         MOV     ES:[DI.BUFDIRTY],1
         ADD     DI,BUFINSIZ     ; Point at buffer
         MOV     AX,202EH        ; ". "
         STOSW
         MOV     DX,[DIRSTART]   ; Point at itself
-        invoke  SETDOTENT
+        $INVOKE  SETDOTENT
         MOV     AX,2E2EH        ; ".."
         STOSW
         POP     DX              ; Parent
-        invoke  SETDOTENT
+        $INVOKE  SETDOTENT
         LES     BP,[THISDPB]
         POP     DX              ; Entry sector
         XOR     AL,AL           ; Pre read
-        invoke  GETBUFFR
+        $INVOKE  GETBUFFR
         MOV     DX,[DIRSTART]
         LDS     DI,[CURBUF]
 ASSUME  DS:NOTHING
@@ -115,7 +115,7 @@ DIRUP:
         POP     DS
 ASSUME  DS:DOSGROUP
         MOV     AL,ES:[BP.dpb_drive]
-        invoke  FLUSHBUF
+        $INVOKE  FLUSHBUF
 SYS_RET_OKJ:
         JMP     SYS_RET_OK
 
@@ -124,7 +124,7 @@ NODEEXISTSPOPDEL:
         POP     DX              ; Entry sector
         LES     BP,[THISDPB]
         XOR     AL,AL           ; Pre read
-        invoke  GETBUFFR
+        $INVOKE  GETBUFFR
         LDS     DI,[CURBUF]
 ASSUME  DS:NOTHING
         POP     SI              ; dir_first pointer
@@ -150,13 +150,13 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;       STD XENIX Return
 ;       AX = chdir_path_not_found if error
 
-        invoke  validate_path
+        $INVOKE  validate_path
         JC      PathTooLong
 
         PUSH    DS
         PUSH    DX
         MOV     SI,DX
-        invoke  GETPATH
+        $INVOKE  GETPATH
         JC      PATHNOGOOD
         JNZ     PATHNOGOOD
 ASSUME  DS:DOSGROUP
@@ -232,7 +232,7 @@ CHECK_LEN:
         CMP     BX,DIRSTRLEN
         JB      COPYTHESTRING
         MOV     AL,ES:[DI-1]
-        invoke  PATHCHRCMP
+        $INVOKE  PATHCHRCMP
         JNZ     OK_DI
         DEC     DI
 OK_DI:
@@ -312,13 +312,13 @@ DELLOOP:
         JZ      GOTDELE
         MOV     AL,ES:[DI]
         INC     DI
-        invoke  TESTKANJ
+        $INVOKE  TESTKANJ
         JZ      NOTKANJ11
         INC     DI
         JMP     DELLOOP
 
 NOTKANJ11:
-        invoke  PATHCHRCMP
+        $INVOKE  PATHCHRCMP
         JNZ     DELLOOP
         MOV     DX,DI                   ; Point to char after '/'
         JMP     DELLOOP
@@ -338,7 +338,7 @@ DELLOOP:
         retz
         PUSH    AX
         MOV     AL,ES:[DI-1]
-        invoke  PATHCHRCMP
+        $INVOKE  PATHCHRCMP
         POP     AX
         retz
         DEC     DI
@@ -386,7 +386,7 @@ NotKanj2:
         DEC     BX
 CopyPieceNext:
         LODSB                           ; get next character
-        invoke  PathChrCmp              ; end of road?
+        $INVOKE  PathChrCmp              ; end of road?
         JZ      CopyPieceRet            ; yep, return and don't dec SI
         CMP     AL,AH                   ; end of filename?
         JNZ     CopyPiece               ; go do name
@@ -415,10 +415,10 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;               Directory malformed (. and .. not first two entries)
 ;       AX = rmdir_current_directory
 
-        invoke  Validate_path
+        $INVOKE  Validate_path
         JC      NoPathJ
         MOV     SI,DX
-        invoke  GETPATH
+        $INVOKE  GETPATH
         JC      NOPATHJ
 ASSUME  DS:DOSGROUP
         JNZ     NOTDIRPATH
@@ -428,8 +428,8 @@ ASSUME  DS:DOSGROUP
         MOV     CX,ES:[BP.dpb_current_dir]
         CMP     CX,-1
         JNZ     rmdir_current_dir_check
-        invoke  GetCurrDir
-        invoke  Get_user_stack
+        $INVOKE  GetCurrDir
+        $INVOKE  Get_user_stack
         MOV     DX,[SI.user_DX]
         MOV     DS,[SI.user_DS]
         JMP     $RMDIR
@@ -462,8 +462,8 @@ ASSUME  DS:DOSGROUP
         REP     STOSB
         XOR     AL,AL
         STOSB
-        invoke  STARTSRCH
-        invoke  GETENTRY
+        $INVOKE  STARTSRCH
+        $INVOKE  GETENTRY
         MOV     DS,WORD PTR [CURBUF+2]
 ASSUME  DS:NOTHING
         MOV     SI,BX
@@ -478,16 +478,16 @@ ASSUME  DS:NOTHING
         POP     DS
 ASSUME  DS:DOSGROUP
         MOV     [LASTENT],2             ; Skip . and ..
-        invoke  GETENTRY
+        $INVOKE  GETENTRY
         MOV     [ATTRIB],attr_directory+attr_hidden+attr_system
-        invoke  SRCH
+        $INVOKE  SRCH
         JNC     NOTDIRPATHPOP
         LES     BP,[THISDPB]
         MOV     BX,[DIRSTART]
-        invoke  RELEASE
+        $INVOKE  RELEASE
         POP     DX
         XOR     AL,AL
-        invoke  GETBUFFR
+        $INVOKE  GETBUFFR
         LDS     DI,[CURBUF]
 ASSUME  DS:NOTHING
         POP     BX

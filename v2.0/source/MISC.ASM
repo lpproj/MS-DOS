@@ -86,10 +86,10 @@ ASSUME  DS:NOTHING,ES:NOTHING
         POP     DS
 ASSUME  DS:DOSGROUP
         MOV     AL,DL
-        invoke  GETTHISDRV
+        $INVOKE  GETTHISDRV
         MOV     AL,-1
         JC      BADSLDRIVE
-        invoke  FATREAD
+        $INVOKE  FATREAD
         MOV     DX,ES:[BP.dpb_max_cluster]
         DEC     DX
         MOV     AL,ES:[BP.dpb_cluster_mask]
@@ -97,7 +97,7 @@ ASSUME  DS:DOSGROUP
         MOV     CX,ES:[BP.dpb_sector_size]
         ADD     BP,dpb_media
 BADSLDRIVE:
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
 ASSUME  DS:NOTHING
         MOV     [SI.user_CX],CX
         MOV     [SI.user_DX],DX
@@ -132,7 +132,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
         entry   abort_inner
         MOV     AH,[exit_type]
         MOV     [exit_code],AX
-        invoke  Get_user_stack
+        $INVOKE  Get_user_stack
         MOV     DS,[SI.user_CS]         ; set up old interrupts
         XOR     AX,AX
         MOV     ES,AX
@@ -159,7 +159,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ; Returns:
 ;       AL = -1 if no entries matched, otherwise 0
 
-        invoke  GETFILE
+        $INVOKE  GETFILE
 ASSUME  DS:DOSGROUP
 SAVPLCE:
 ; Search-for-next enters here to save place and report
@@ -238,7 +238,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ; Returns:
 ;       AL = -1 if no entries matched, otherwise 0
 
-        invoke  MOVNAMENOSET
+        $INVOKE  MOVNAMENOSET
 ASSUME  ES:DOSGROUP
         MOV     DI,DX
         JC      NEAR PTR KILLSRCH1
@@ -252,12 +252,12 @@ ASSUME  ES:DOSGROUP
         PUSH    AX
         MOV     WORD PTR [THISDPB],BP
         MOV     WORD PTR [THISDPB+2],ES
-        invoke  SetDirSrch
+        $INVOKE  SetDirSrch
         ASSUME  DS:DOSGROUP
         POP     AX
         MOV     [ENTLAST],-1
-        invoke  GetEnt
-        invoke  NextEnt
+        $INVOKE  GetEnt
+        $INVOKE  NextEnt
         POP     ES
         ASSUME  ES:NOTHING
         POP     DI
@@ -275,7 +275,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ; Returns:
 ;       AL = -1 if no entries matched, otherwise 0
 
-        invoke  GETFILE
+        $INVOKE  GETFILE
 ASSUME  DS:DOSGROUP
         MOV     AL,-1
         retc
@@ -323,7 +323,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ; Returns:
 ;       None
 
-        invoke  GETREC
+        $INVOKE  GETREC
         MOV     WORD PTR [DI+fcb_RR],AX
         MOV     [DI+fcb_RR+2],DL
         CMP     [DI.fcb_RECSIZ],64
@@ -347,19 +347,19 @@ ASSUME  DS:NOTHING,ES:NOTHING
         POP     DS
 ASSUME  DS:DOSGROUP
         MOV     AL,-1
-        invoke  FLUSHBUF
+        $INVOKE  FLUSHBUF
         MOV     WORD PTR [LASTBUFFER+2],-1
         MOV     WORD PTR [LASTBUFFER],-1
-        invoke  SETVISIT
+        $INVOKE  SETVISIT
 ASSUME  DS:NOTHING
 NBFFR:                                  ; Free ALL buffers
         MOV     [DI.VISIT],1            ; Mark as visited
         CMP     BYTE PTR [DI.BUFDRV],-1
         JZ      SKPBF                   ; Save a call to PLACEBUF
         MOV     WORD PTR [DI.BUFDRV],00FFH
-        invoke  SCANPLACE
+        $INVOKE  SCANPLACE
 SKPBF:
-        invoke  SKIPVISIT
+        $INVOKE  SKIPVISIT
         JNZ     NBFFR
         return
 $DISK_RESET ENDP
@@ -380,12 +380,12 @@ ASSUME  DS:NOTHING,ES:NOTHING
         JNZ     RAWOUT
         LES     DI,DWORD PTR [user_SP]                ; Get pointer to register save area
         XOR     BX,BX
-        invoke  GET_IO_FCB
+        $INVOKE  GET_IO_FCB
         retc
         MOV     AH,1
-        invoke  IOFUNC
+        $INVOKE  IOFUNC
         JNZ     RESFLG
-        invoke  SPOOLINT
+        $INVOKE  SPOOLINT
         OR      BYTE PTR ES:[DI.user_F],40H ; Set user's zero flag
         XOR     AL,AL
         return
@@ -394,7 +394,7 @@ RESFLG:
         AND     BYTE PTR ES:[DI.user_F],0FFH-40H    ; Reset user's zero flag
 
 RILP:
-        invoke  SPOOLINT
+        $INVOKE  SPOOLINT
     entry   $RAW_CON_INPUT        ; System call 7
 
 ; Inputs:
@@ -405,13 +405,13 @@ RILP:
 ;       AL = character
 
         XOR     BX,BX
-        invoke  GET_IO_FCB
+        $INVOKE  GET_IO_FCB
         retc
         MOV     AH,1
-        invoke  IOFUNC
+        $INVOKE  IOFUNC
         JZ      RILP
         XOR     AH,AH
-        invoke  IOFUNC
+        $INVOKE  IOFUNC
         return
 ;
 ;       Output the character in AL to stdout
@@ -421,7 +421,7 @@ entry   RAWOUT
         PUSH    BX
         MOV     BX,1
 
-        invoke  GET_IO_FCB
+        $INVOKE  GET_IO_FCB
         JC      RAWRET1
 
         TEST    [SI.fcb_DEVID],080H             ; output to file?
@@ -448,13 +448,13 @@ RAWRET1:
 ;
 entry   RAWOUT2
 
-        invoke  GET_IO_FCB
+        $INVOKE  GET_IO_FCB
         retc
 RAWOUT3:
         PUSH    AX
         JMP     SHORT RAWOSTRT
 ROLP:
-        invoke  SPOOLINT
+        $INVOKE  SPOOLINT
 RAWOSTRT:
         MOV     AH,3
         CALL    IOFUNC
@@ -473,7 +473,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
         LODS    CS:BYTE PTR [SI]
         CMP     AL,"$"
         retz
-        invoke  OUT
+        $INVOKE  OUT
         JMP     SHORT OUTMES
         return
 OutMes  ENDP
@@ -500,9 +500,9 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ;       AL = 1 if '*' or '?' in filename or extension, 0 otherwise
 ;       DS:SI points to first character after filename
 
-        invoke  MAKEFCB
+        $INVOKE  MAKEFCB
         PUSH    SI
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         POP     [SI.user_SI]
         return
 $PARSE_FILE_DESCRIPTOR ENDP
@@ -535,7 +535,7 @@ ASSUME  DS:NOTHING,ES:NOTHING,SS:NOTHING
         JMP     SHORT Create_copy
 
 Create_PDB_old:
-        invoke  get_user_stack
+        $INVOKE  get_user_stack
         MOV     DS,[SI.user_CS]
 
 Create_copy:
@@ -558,11 +558,11 @@ Create_copy:
 
 Create_dup_jfn:
         PUSH    ES                      ; save new PDB
-        invoke  get_jfn_pointer         ; ES:DI is jfn
+        $INVOKE  get_jfn_pointer         ; ES:DI is jfn
         JC      create_skip             ; not a valid jfn
         PUSH    ES                      ; save him
         PUSH    DI
-        invoke  get_sf_from_jfn         ; get sf pointer
+        $INVOKE  get_sf_from_jfn         ; get sf pointer
         JC      create_no_inc
         INC     ES:[DI].sf_ref_count    ; new fh
 

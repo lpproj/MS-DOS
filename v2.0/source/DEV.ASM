@@ -45,7 +45,7 @@ SUBTTL IOFUNC -- DO FUNCTION 1-12 I/O
 PAGE
 IOFUNC_RETRY:
 ASSUME  DS:NOTHING,ES:NOTHING
-        invoke  restore_world
+        $INVOKE  restore_world
 
         procedure   IOFUNC,NEAR
 ASSUME  DS:NOTHING,ES:NOTHING
@@ -88,7 +88,7 @@ IOFUNC2:
         JMP     IOTOFILE
 
 IOTODEV:
-        invoke  save_world
+        $INVOKE  save_world
         PUSH    DS
         PUSH    SS
         POP     ES
@@ -128,7 +128,7 @@ ASSUME  DS:NOTHING
         TEST    DI,STERR
         JZ      OKDEVIO
         MOV     AH,CL
-        invoke  CHARHARD
+        $INVOKE  CHARHARD
         CMP     AL,1
         JZ      IOFUNC_RETRY
 ;Know user must have wanted ignore. Make sure device shows ready so
@@ -148,7 +148,7 @@ DNODRD: MOV     AH,BYTE PTR [IOCALL.REQSTAT+1]
         NOT     AH                      ; Zero = busy, not zero = ready
         AND     AH,STBUI SHR 8
 
-        invoke  restore_world
+        $INVOKE  restore_world
 ASSUME  DS:NOTHING
         MOV     AX,WORD PTR [DEVIOBUF]
         return
@@ -177,16 +177,16 @@ IOIST:
 
 IOUT:
         CALL    SETXADDR
-        invoke  STORE
-        invoke  FINNOSAV
+        $INVOKE  STORE
+        $INVOKE  FINNOSAV
         CALL    RESTXADDR       ; If you change this into a jmp don't come
         return                  ; crying to me when things don't work ARR
 
 IOIN:
         CALL    SETXADDR
-        invoke  LOAD
+        $INVOKE  LOAD
         PUSH    CX
-        invoke  FINNOSAV
+        $INVOKE  FINNOSAV
         POP     CX
         OR      CX,CX           ; Check EOF
         CALL    RESTXADDR
@@ -197,7 +197,7 @@ IOIN:
 
 SETXADDR:
         POP     WORD PTR [CALLSCNT]     ; Return address
-        invoke  save_world
+        $INVOKE  save_world
         PUSH    WORD PTR [DMAADD]       ; Save Disk trans addr
         PUSH    WORD PTR [DMAADD+2]
         PUSH    DS
@@ -213,14 +213,14 @@ ASSUME  DS:DOSGROUP
 ASSUME  DS:NOTHING
         MOV     [SI.fcb_RECSIZ],1           ; One byte per record
         MOV     DX,SI                   ; FCB to DS:DX
-        invoke  GETRRPOS
+        $INVOKE  GETRRPOS
         JMP     SHORT RESTRET           ; RETURN ADDRESS
 
 RESTXADDR:
         POP     WORD PTR [CALLSCNT]     ; Return address
         POP     WORD PTR [DMAADD+2]     ; Restore Disk trans addr
         POP     WORD PTR [DMAADD]
-        invoke  restore_world
+        $INVOKE  restore_world
 RESTRET:JMP     WORD PTR [CALLSCNT]      ; Return address
 IOFUNC  ENDP
 
