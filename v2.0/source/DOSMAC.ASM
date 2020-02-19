@@ -231,6 +231,7 @@ endm
 BREAK <CONDRET - conditional return>
 
 makelab macro l,cc,ncc
+    local a
     j&ncc   a                           ; j<NCC> a:
     return                              ; return
     a:                                  ; a:
