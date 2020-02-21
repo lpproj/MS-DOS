@@ -12,10 +12,17 @@ RM_F=del /F /Q
 #RM_F=deltree /Y
 #RM_F=rm -f
 
+# MASM 6.13.8204 (ml.exe)
 AS=ml
 ASFLAGS=-Cu -nologo -Zm
 .asm.obj:
 	$(AS) -c $(ASFLAGS) -Fo$@ $<
+
+# MASM 5.10
+#AS=msdos masm.exe
+#ASFLAGS=/Mu /DDOSMACV2
+#.asm.obj:
+#	$(AS) $(ASFLAGS) $<,$@;
 
 # Borland tlink 3.01 (tc++1.01)
 LD=msdos tlink.exe
@@ -36,7 +43,7 @@ command.com: $(OBJS) COMLINK
 	$(LD) $(LDFLAGS) @COMLINK
 
 # for openwatcom linker wlink
-# Unfortunately. the COMMAND.COM produced directly by wlink is currupt, 
+# Unfortunately. the COMMAND.COM produced directly by wlink is courrupt, 
 # so you should use external something exe2bin-like tool to convert the EXE to the COM.
 #
 #command.com: $(OBJS)

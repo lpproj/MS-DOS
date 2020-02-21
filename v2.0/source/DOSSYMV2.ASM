@@ -1,4 +1,8 @@
-include DOSMAC.ASM
+IFDEF DOSMACV2
+    include DOSMACV2.ASM
+ELSE
+    include DOSMAC.ASM
+ENDIF
 IF2
     %OUT    DOSSYM in Pass 2
 ENDIF
