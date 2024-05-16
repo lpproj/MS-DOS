@@ -184,6 +184,7 @@ Procedure   GetKeyStroke,NEAR
 ; read any character at any mode, interim mode or not.
 ;
 
+	PUSH	BX					;lpproj;
 	PUSH	DX					;AN000;  3/3/KK
 	MOV	AX,(ECS_call SHL 8) OR GetInterimMode	;AN000;  3/3/KK
 	INT	int_command				;AN000;  3/3/KK
@@ -194,6 +195,7 @@ Procedure   GetKeyStroke,NEAR
 
 	MOV	AX,(STD_CON_INPUT_FLUSH SHL 8) OR STD_CON_INPUT_no_echo
 	INT	int_command		; Get character with KB buffer flush
+	MOV	BL,AL					;lpproj;
 	MOV	AX,(STD_CON_INPUT_FLUSH SHL 8) + 0
 	INT	int_command
 
@@ -201,6 +203,8 @@ Procedure   GetKeyStroke,NEAR
 	POP	DX					;AN000;  restore interim state 3/3/KK
 	INT	int_command				;AN000;  3/3/KK
 	POP	DX					;AN000;  3/3/KK
+	MOV	AL,BL					;lpproj;
+	POP	BX					;lpproj;
 
 	return
 EndProc GetKeyStroke
@@ -1042,4 +1046,4 @@ ENDIF
 
 TRANCODE    ENDS
 	    END
-
+

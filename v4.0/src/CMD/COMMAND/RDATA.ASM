@@ -569,6 +569,13 @@ TranVarEnd	LABEL	BYTE
 
 olderrno	dw	?
 
+	PUBLIC	res_dbcs_dummy			;lpproj;
+	IF JAPAN				;lpproj;
+res_dbcs_dummy	db	81H, 9FH, 0E0H, 0FCH, 0, 0	;lpproj; fallback DBCS vector for Japanese (CP932/ShiftJIS)
+	ELSE					;lpproj;
+res_dbcs_dummy	db	0, 0			;lpproj; fallback DBCS vector (SBCS)
+	ENDIF					;lpproj;
+
 RESMSGEND	DW	0			;AN000;; holds offset of msg end (end of resident)
 
 .xlist

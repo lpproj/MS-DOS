@@ -16,6 +16,10 @@ Title	COMMAND Language midifiable Code Transient
 
 DATARES 	SEGMENT PUBLIC BYTE	;AC000;
 	EXTRN	ECHOFLAG:BYTE
+IFDEF VER_RELAXED				;lpproj;
+	EXTRN	no_char:BYTE			;lpproj;
+	EXTRN	yes_char:BYTE			;lpproj;
+ENDIF						;lpproj;
 DATARES ENDS
 
 TRANDATA	SEGMENT PUBLIC BYTE	;AC000;
@@ -61,6 +65,10 @@ TRANCODE	SEGMENT PUBLIC BYTE
 	PUBLIC	PRINT_DATE
 	PUBLIC	SLASHP_ERASE		;AN000;
 	PUBLIC	VERIFY
+IFDEF VER_RELAXED			;lpproj;
+	PUBLIC	IsDOS4			;lpproj;
+ENDIF					;lpproj;
+
 
 ASSUME	CS:TRANGROUP,DS:TRANGROUP,ES:TRANGROUP,SS:NOTHING
 
@@ -507,6 +515,35 @@ assume	ds:trangroup
 
 char_in_xlat	proc	near
 
+IFDEF VER_RELAXED				;lpproj;
+	call	IsDOS4				;lpproj;
+	jae	cxlat_10			;lpproj;
+	cmp	al,'a'				;lpproj;
+	jb	cxlat_02			;lpproj;
+	cmp	al,'z'				;lpproj;
+	ja	cxlat_02			;lpproj;
+	sub	al,'a' - 'A'			;lpproj;
+cxlat_02:					;lpproj;
+assume ds:RESGROUP				;lpproj;
+	push	ds				;lpproj;
+	mov	ds,[RESSEG]			;lpproj;
+	cmp	al,yes_char			;lpproj;
+	je	cxlat_yes			;lpproj;
+	cmp	al,no_char			;lpproj;
+	mov	al,2				;lpproj;
+	jne	cxlat_ret			;lpproj;
+cxlat_no:					;lpproj;
+	xor	al,al				;lpproj;
+	pop	ds				;lpproj;
+	ret					;lpproj;
+cxlat_yes:					;lpproj;
+	mov	al,1				;lpproj;
+cxlat_ret:					;lpproj;
+	pop	ds				;lpproj;
+	ret					;lpproj;
+cxlat_10:					;lpproj;
+assume	ds:trangroup				;lpproj;
+ENDIF						;lpproj; (IFDEF VER_RELAXED)
 	mov	dl,al				;AC000; get character into DX
 	xor	dh,dh				;AC000;
 	mov	ax,(getextcntry SHL 8) + 35	;AC000; Yes/No char call
@@ -515,6 +552,25 @@ char_in_xlat	proc	near
 	ret
 
 char_in_xlat	endp
+
+IFDEF VER_RELAXED				;lpproj;
+IsDOS4 proc near				;lpproj;
+	push	ax				;lpproj;
+	push	bx				;lpproj;
+	push	cx				;lpproj;
+	mov	AX,Get_Version SHL 8		;lpproj;
+	int	int_command			;lpproj;
+	pop	cx				;lpproj;
+	pop	bx				;lpproj;
+	cmp	al,10				;lpproj;
+	jnz	isdos4_02			;lpproj;
+	mov	al,3				;lpproj; OS/2 v1 DOS 3.30 (ax=1e03h)
+isdos4_02:					;lpproj;
+	cmp	al,4				;lpproj;
+	pop	ax				;lpproj;
+	ret					;lpproj;
+IsDOS4 endp					;lpproj;
+ENDIF						;lpproj;
 
 TRANCODE	ENDS
 	END

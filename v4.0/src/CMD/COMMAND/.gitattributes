@@ -1,0 +1,6 @@
+#
+#*.BAT text working-tree-encoding=CP932 eol=crlf
+#*.bat text working-tree-encoding=CP932 eol=crlf
+*.BAT text working-tree-encoding=CP437 eol=crlf
+*.bat text working-tree-encoding=CP437 eol=crlf
+

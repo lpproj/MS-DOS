@@ -225,6 +225,10 @@ BUILDPATH:
 	mov	dx,bp
 	add	dx,BUF				; Set DX to spec
 
+IFDEF VER_RELAXED				;lpproj;
+	mov	ax,(OPEN SHL 8) OR ((read_open_mode) AND 0FFH)	;lpproj;
+	INT	int_command			;lpproj;
+ELSE						;lpproj;
 	push	di				;AN000;
 	MOV	AX,EXTOPEN SHL 8		;AC000; open the file
 	mov	bx,read_open_mode		;AN000; get open mode for COPY
@@ -234,6 +238,7 @@ BUILDPATH:
 	mov	dx,read_open_flag		;AN000; set up open flags
 	INT	int_command
 	pop	di				;AN000;
+ENDIF						;lpproj; (IFDEF VER_RELAXED)
 	jnc	pure_file			;AN022; is pure file
 	invoke	get_ext_error_number		;AN022; get the extended error
 	cmp	ax,error_file_not_found 	;AN022; if file not found - okay

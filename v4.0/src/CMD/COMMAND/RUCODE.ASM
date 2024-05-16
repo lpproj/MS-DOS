@@ -245,12 +245,25 @@ GotStyle:
 
 	MOV	DI,AX				; retrieve correct extended error...
 	mov	ax,0500h			; Is the redir there?
+	push	bx				;lpproj; to be safe
 	int	2fh
+	pop	bx				;lpproj; to be safe
 	cmp	al,0ffh
 	jnz	NoHandler			; No, go to NoHandler
 	push	bx								   ;AN063;
 	mov	bx,di				; Get ErrType and ptr to error msg ;AC063;
+IFDEF VER_RELAXED			;lpproj;
+	call	RIsDOS4			;lpproj;
+	jae	msg_dos4		;lpproj;
+	mov	ax,di			;lpproj;
+	mov	ah,05h			;lpproj;
+	jmp	short msg_exp		;lpproj;
+msg_dos4:				;lpproj;
+	mov	ax,0501h		;lpproj;
+msg_exp:				;lpproj;
+ELSE					;lpproj;
 	mov	ax,0501h							   ;AC063;
+ENDIF					;lpproj; (IFDEF VER_RELAXED)
 	int	2fh
 	pop	bx								   ;AC063;
 	jc	NoHandler
@@ -606,12 +619,20 @@ in_char_xlat	proc	near
 
 	cmp	al,80h				;g see if char is above ascii 128
 	jb	other_xlat			;g no - upper case math
+IFNDEF VER_RELAXED				;lpproj;
 	sub	al,80h				;g only upper 128 characters in table
+ENDIF						;lpproj;
 	push	ds
 	push	bx
 	lds	bx,dword ptr com_xlat_addr+1 ;g get table address
+IFDEF VER_RELAXED				;lpproj;
+	test	bx,bx				;lpproj; workaround for 3.x
+	je	in_char_xlat_01			;lpproj;
+	sub	al,80h				;lpproj;
+ENDIF						;lpproj;
 	add	bx,2				;g skip over first word, of table
 	xlat	ds:byte ptr [bx]		;g convert to upper case
+in_char_xlat_01:				;lpproj;
 	pop	bx
 	pop	ds
 	jmp	short in_char_xlat_end		;g we finished - exit
@@ -683,6 +704,12 @@ reset_msg_pointers	proc	near
 
 assume	ds:resgroup, es:nothing
 
+IFDEF VER_RELAXED				;lpproj;
+	call	RIsDOS4				;lpproj;
+	jae	res_msg_02			;lpproj;
+	ret					;lpproj;
+res_msg_02:					;lpproj;
+ENDIF						;lpproj;
 	push	es				;AN000; save used registers
 	push	ax				;AN000;
 	push	dx				;AN000;
@@ -710,6 +737,13 @@ assume	ds:resgroup, es:nothing
 
 
 reset_msg_pointers	endp
+
+IFDEF VER_RELAXED				;lpproj;
+PUBLIC RIsDOS4					;lpproj;
+RIsDOS4	PROC	NEAR				;lpproj;
+	jmp	$M_IS_DOS4			;lpproj;
+RIsDOS4	ENDP					;lpproj;
+ENDIF						;lpproj;
 
 PUBLIC		MSG_SERV_ST			;AN000;
 MSG_SERV_ST	LABEL	BYTE			;AN000;

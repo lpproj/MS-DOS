@@ -2917,8 +2917,14 @@ $P_Chk_DBCS PROC			;AN000;
 	PUSH	DI			;AN000;
 	PUSH	BP			;AN000;
 	PUSH	ES			;AN000;
+IF JAPAN				;lpproj; prepare fallback DBCS EV for Japanese DOS 3.x
+	MOV	SI,OFFSET cs: $P_DBCS_dummy_table	;lpproj;
+	PUSH	CS			;lpproj;
+	POP	DS			;lpproj;
+ELSE					;lpproj;
 	XOR	SI,SI			;AN000;
 	MOV	DS,SI			;AN000;
+ENDIF					;lpproj;
 	MOV	AX,$P_DOS_GetEV 	;AN000; GET DBCS EV CALL
 	INT	21H			;AN000;
 
@@ -2971,4 +2977,9 @@ $P_DBCS_EXIT:				;AN000;
 	POP	SI			;AN000;
 	POP	DS			;AN000;
 	RET				;AN000;
+IF JAPAN				;lpproj;
+$P_DBCS_dummy_table:			;lpproj;
+	DB	81H, 9FH, 0E0H, 0FCH	;lpproj;
+	DB	0, 0			;lpproj;
+ENDIF					;lpproj;
 $P_Chk_DBCS ENDP			;AN000;

@@ -170,6 +170,17 @@ $M_COUNTRY_INFO STRUC					     ;;AN000;; Expected Country infomation
 $M_COUNTRY_INFO ENDS					     ;;AN000;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 							     ;;
+
+    IFDEF VER_RELAXED						;lpproj;
+      IF VER_RELAXED						;lpproj;
+        IF JAPAN						;lpproj;
+        $M_DBCS_DUMMY    db		81H, 9FH, 0E0H, 0FCH, 0, 0	;lpproj;
+        ELSE							;lpproj;
+        $M_DBCS_DUMMY    db		0, 0				;lpproj;
+        ENDIF							;lpproj; (JAPAN)
+      ENDIF							;lpproj; (VER_RELAXED)
+    ENDIF							;lpproj; (IFDEF VER_RELAXED)
+
 ELSE							     ;;AN000;;	ELSE if we have already included the STRUCTURES
 ; 
 ;   $SALUT  $M	(2,5,13,62)				     ;;AN000;;	Set SALUT formatting for code section
@@ -631,6 +642,9 @@ $M_GET_DBCS_VEC PROC NEAR				     ;;AN000;;
 	PUSH	AX					     ;;AN000;; Save character to check
 	PUSH	SI					     ;;AN000;;
 	PUSH	DS					     ;;AN000;;
+IFDEF VER_RELAXED					     ;lpproj;
+	MOV	SI,OFFSET DS: $M_DBCS_DUMMY		     ;lpproj;
+ENDIF							     ;lpproj;
 	MOV	AX,DOS_GET_DBCS_INFO			     ;;AN000;; DOS function to get DBSC environment
 	INT	21H					     ;;AN000;; Get environment pointer
 	PUSH	DS					     ;;AN000;; Get environment pointer
@@ -744,9 +758,21 @@ $M_VERSION_CHECK PROC NEAR				     ;;AN000;;
 	  MOV	  AH,DOS_GET_VERSION			     ;;AN000;; Check that version matches VERSIONA.INC
 	  INT	  21H					     ;;AN000;;
 							     ;;
+	IFDEF VER_RELAXED				     ;lpproj;
+	  IF VER_RELAXED				     ;lpproj;
+	  XCHG	  AL, AH				     ;lpproj;
+	  CMP	  AX, 030AH				     ;lpproj; allow DOS 3.1+ ifdef VER_RELAXED
+	  XCHG	  AL, AH				     ;lpproj;
+	  JB $MIF25					     ;lpproj;
+	  ELSE						     ;lpproj;
+	  CMP	  AX,EXPECTED_VERSION			     ;lpproj;
+	  JNE $MIF25					     ;lpproj;
+	  ENDIF						     ;lpproj;
+	ELSE						     ;lpproj;
 	  CMP	  AX,EXPECTED_VERSION			     ;;AN000;; IF DOS_MAJOR is correct
 ;	  $IF	  E					     ;;AN000;;
 	  JNE $MIF25
+	ENDIF						     ;lpproj; (IFDEF VER_RELAXED)
 	    CLC 					     ;;AN000;;	 Clear the carry flag
 ;	  $ELSE 					     ;;AN000;; ELSE
 	  JMP SHORT $MEN25
@@ -916,6 +942,19 @@ $MIF39:
 		CMP	AX,$M_CRIT_HI			     ;;AN000;;
 ;		$IF	BE				     ;;AN000;;	    Yes,
 		JNBE $MIF41
+IFDEF VER_RELAXED						;lpproj;
+		  CALL	$M_IS_DOS4				;lpproj;
+		  JZ $men39_02					;lpproj;
+		  IF FARmsg					;lpproj;
+		    LES	DI,DWORD PTR $M_RT.$M_CLASS_ADDRS[SI]	;lpproj;
+		    MOV	BX,ES					;lpproj;
+		  ELSE						;lpproj;
+		    MOV	DI,WORD PTR $M_RT.$M_CLASS_ADDRS[SI]	;lpproj;
+		    MOV	BX,DI					;lpproj;
+		  ENDIF						;lpproj;
+		  JMP SHORT $MEN41				;lpproj;
+$men39_02:							;lpproj;
+ENDIF								;lpproj; (IFDEF VER_RELAXED)
 		  LES	  DI,DWORD PTR $M_RT.$M_CRIT_ADDRS[SI] ;;AN000;; Get address of class
 		  MOV	  BX,ES 			     ;;AN000;
 ;		$ELSE					     ;;AN000;;
@@ -988,6 +1027,12 @@ $MEN36:
 	    JNE $MIF57
 	      MOV     BX,AX				     ;;AN006;;	  BX is the extended error number
 	      MOV     AX,IFS_GET_ERR_TEXT		     ;;AN006;;	  AX is the muliplex number
+IFDEF VER_RELAXED	;lpproj;			     ;lpproj;
+	      CALL    $M_IS_DOS4			     ;lpproj;
+	      JAE     $mif56_02				     ;lpproj;
+	      MOV     AL,BL				     ;lpproj;
+$mif56_02:						     ;lpproj;
+ENDIF							     ;lpproj; (IFDEF VER_RELAXED)
 	      INT     2FH				     ;;AN006;;	  Call IFSFUNC
 ;	    $ELSE					     ;;AN006;;	 No,
 	    JMP SHORT $MEN57
@@ -2182,6 +2227,10 @@ $MEN219:
 	    PUSH    CX					     ;;AN006;;
 	    PUSH    ES					     ;;AN006;;
 	    PUSH    DI					     ;;AN006;;
+IFDEF VER_RELAXED					     ;lpproj;
+	    CALL    $M_IS_DOS4				     ;lpproj;
+	    JB      $MIF240				     ;lpproj;
+ENDIF							     ;lpproj;
 	    PUSH    AX					     ;;AN006;;
 
 	    MOV     AX,IFSFUNC_INSTALL_CHECK		     ;;AN006;;	Check if IFSFUNC is installed
@@ -3127,6 +3176,24 @@ $M_WAIT_FOR_INPUT ENDP					     ;;AN000;;
 							     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	ENDIF						     ;;AN000;; END of include of Wait for Input
+IFDEF VER_RELAXED				;lpproj;
+$M_IS_DOS4 proc near				;lpproj;
+	push	ax				;lpproj;
+	push	bx				;lpproj;
+	push	cx				;lpproj;
+	mov	AX,Get_Version SHL 8		;lpproj;
+	int	int_command			;lpproj;
+	pop	cx				;lpproj;
+	pop	bx				;lpproj;
+	cmp	al,10				;lpproj;
+	jnz	$m_is_dos4_02			;lpproj;
+	mov	al,3				;lpproj; OS/2 v1 DOS 3.30 (ax=1e03h)
+$m_is_dos4_02:					;lpproj;
+	cmp	al,4				;lpproj;
+	pop	ax				;lpproj;
+	ret					;lpproj;
+$M_IS_DOS4 endp					;lpproj;
+ENDIF						;lpproj;
       ENDIF						     ;;AN000;; END of include of SYSDISPMSG
     ENDIF						     ;;AN000;; END of include of MSG_DATA_ONLY
 ENDIF							     ;;AN000;; END of include of Structure only

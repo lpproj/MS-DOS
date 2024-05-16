@@ -184,17 +184,17 @@ print_B:
 	mov	al,vbar
 
 print_char:
-	push	es
-	push	ds
-	pop	es
-	push	di
+;	push	es				;lpproj; commented out
+;	push	ds				;lpproj; commented out
+;	pop	es				;lpproj; commented out
+;	push	di				;lpproj; commented out
 	push	dx
 	mov	dl,al				;AC000; Get char into al
 	mov	ah,Std_CON_output		;AC000; print the char to stdout
 	int	int_command			;AC000;
 	pop	dx
-	pop	di
-	pop	es
+;	pop	di				;lpproj; commented out
+;	pop	es				;lpproj; commented out
 	ret
 
 print_drive:
@@ -405,6 +405,22 @@ CLS:
 	cmp	al,ANSI_installed		;AN000;
 	jz	ansicls 			;AN000; installed - go do ANSI CLS
 
+check_ibmpc:					;lpproj;
+	push	ds				;lpproj;
+	xor	ax,ax				;lpproj;
+	mov	ds,ax				;lpproj;
+	mov	ax,word ptr ds: [0AEH * 4]	;lpproj; if intAEh!=intB0h, may not be ibmpc (workaround mostly for FM R/TOWNS series)
+	cmp	ax,word ptr ds: [0B0H * 4]	;lpproj; note: don't forget the prefix "ds:"
+	pop	ds				;lpproj;
+	jnz	ansicls				;lpproj;
+	mov	bh,0FFH				;lpproj;
+	mov	ah,get_video_state		;lpproj; invoke ibmpc video bios (to get current video mode, columns and video page)
+	int	video_io_int			;lpproj;
+	cmp	bh,0FFH				;lpproj; if page not specified, may not be ibmpc video bios
+	jz	ansicls				;lpproj;
+	cmp	ah,get_video_state		;lpproj; if columns not specified, may not be ibmpc video bios
+	jz	ansicls				;lpproj;
+
 check_lines:
 	mov	ax,(IOCTL SHL 8) + generic_ioctl_handle ;AN000; get lines per page on display
 	mov	bx,stdout			;AN000; lines for stdout
@@ -461,6 +477,18 @@ DoAlpha:
 	int	video_io_int			;AC000; do int 10h - BIOS video IO
 	mov	dl,ah
 	mov	dh,linesperpage 		;AC000; have 25 rows on the screen
+IF 1						;lpproj; support wide console
+	push	ds				;lpproj;
+	mov	ax,40h				;lpproj;
+	mov	ds,ax				;lpproj;
+	mov	al,byte ptr ds: [0084h]	;lpproj; 0040:0084 screen rows-1 (EGA+)
+	pop	ds				;lpproj;
+	cmp	al,0				;lpproj; guess CGA/MDA if 0040:0084 == 0
+	jz	reg_cls				;lpproj;
+	inc	al				;lpproj; guess CGA/MDA if 0040:0084 == FFh
+	jz	reg_cls				;lpproj;
+	mov	dh,al				;lpproj;
+ENDIF						;lpproj;
 
 regcls:
 	call	reg_cls 			;AC000; go clear the screen
@@ -549,4 +577,4 @@ ansi_cls	endp				;AC000;
 
 trancode    ends
 	    end
-
+

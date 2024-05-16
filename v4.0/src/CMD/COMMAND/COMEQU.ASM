@@ -7,7 +7,11 @@ EMGDEBUG = FALSE
 
 SYM		EQU	">"
 
+IFDEF JAPAN				;lpproj;
+LINESPERPAGE	EQU	24		;lpproj; (on many old Japanese PCs, the bottom row is reserved for the system)
+ELSE					;lpproj;
 LINESPERPAGE	EQU	25		;AC000; default lines per page
+ENDIF					;lpproj;
 NORMPERLIN	EQU	1
 WIDEPERLIN	EQU	5
 COMBUFLEN	EQU	128		; Length of commmand buffer

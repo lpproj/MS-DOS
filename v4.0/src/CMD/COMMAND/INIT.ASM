@@ -53,6 +53,7 @@ DATARES 	SEGMENT PUBLIC BYTE	;AC000;
 	EXTRN	critical_msg_start:byte ;AN000;
 	EXTRN	DATARESEND:BYTE 	;AC000;
 	EXTRN	dbcs_vector_addr:word	;AN000;
+	EXTRN	res_dbcs_dummy:BYTE	;lpproj;
 	EXTRN	DEVE_OP_SEG:WORD	;AN000;
 	EXTRN	DEVE_OP_SEG2:WORD	;AN000;
 	EXTRN	disp_class:byte 	;AN000;
@@ -240,6 +241,10 @@ set_msg_addr:
 ;
 
 	push	es				;AN000; SAVE ES DESTROYED BY INT 2FH
+IFDEF VER_RELAXED				;lpproj;
+	xor	di,di				;lpproj; to be safe
+	mov	es,di				;lpproj; to be safe
+ENDIF						;lpproj;
 ;AD060; mov	ah,multdos			;AN000; set up to call DOS through int 2fh
 ;AD060; mov	al,message_2f			;AN000; call for message retriever
 	mov	ax,(multdos shl 8 or message_2f);AN060; set up to call DOS through int 2fh
@@ -305,6 +310,7 @@ set_msg_addr:
 
 	push	ds				;AN000;
 	mov	ax, (ECS_call SHL 8) OR GetLeadBTbl ;AN000; get dbcs vector
+	mov	si, offset resgroup:res_dbcs_dummy	;lpproj; prepare fallback DBCS EV for DOS 3.x
 	int	int_command			;AN000;
 	mov	bx,ds				;AN000; get segment to bx
 	pop	ds				;AN000;
@@ -1440,12 +1446,20 @@ iupconv proc	near				;AN000;
 
 	cmp	al,80h				;AN000; see if char is > ascii 128
 	jb	other_fucase			;AN000; no - upper case math
+IFNDEF VER_RELAXED				;lpproj;
 	sub	al,80h				;AN000; only upper 128 chars in table
+ENDIF						;lpproj; (IFNDEF VER_RELAXED)
 	push	ds				;AN000;
 	push	bx				;AN000;
 	lds	bx,dword ptr fucase_addr+1	;AN000;  get table address
+IFDEF VER_RELAXED				;lpproj;
+	test	bx,bx				;lpproj; workaround for DOS 3.x
+	je	iupconv_02			;lpproj;
+	sub	al,80h				;lpproj;
+ENDIF						;lpproj; (IFDEF VER_RELAXED)
 	add	bx,2				;AN000;  skip over first word
 	xlat	ds:byte ptr [bx]		;AN000;  convert to upper case
+iupconv_02:					;lpproj;
 	pop	bx				;AN000;
 	pop	ds				;AN000;
 	jmp	short iupconv_end		;AN000;  we finished - exit

@@ -13,6 +13,11 @@
 
 :class	2			;AC000; Transient parse errors
 
+:use PARSE1			;lpproj; (workaround) ;AC000; "Too many parameters"
+:use PARSE2			;lpproj; (workaround) ;AC000; "Required parameter missing"
+:use PARSE3			;lpproj; (workaround) ;AC000; "Invalid switch"
+:use PARSE10			;lpproj; (workaround) ;AC000; "Invalid parameter"
+
 :class	3			;AC000; Resident extended errors
 :use -1 EXTEND999		;AN000; "Extended error #"
 

@@ -497,14 +497,22 @@ upconv	proc	near				;AN000;
 
 	cmp	al,80h				;AN000;  see if char is > ascii 128
 	jb	oth_fucase			;AN000;  no - upper case math
+IFNDEF VER_RELAXED				;lpproj;
 	sub	al,80h				;AN000;  only upper 128 chars in table
+ENDIF						;lpproj;
 	push	ds				;AN000;
 	push	bx				;AN000;
 	mov	ds,[resseg]			;AN000;  get resident data segment
 assume	ds:resgroup				;AN000;
 	lds	bx,dword ptr fucase_addr+1	;AN000;  get table address
+IFDEF VER_RELAXED				;lpproj;
+	test	bx,bx				;lpproj; workaround for 3.x
+	je	upconv_01			;lpproj;
+	sub	al,80h				;lpproj;
+ENDIF						;lpproj;
 	add	bx,2				;AN000;  skip over first word
 	xlat	ds:byte ptr [bx]		;AN000;  convert to upper case
+upconv_01:					;lpproj;
 	pop	bx				;AN000;
 	pop	ds				;AN000;
 assume	ds:trangroup				;AN000;

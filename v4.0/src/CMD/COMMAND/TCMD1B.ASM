@@ -79,6 +79,9 @@ transpace   ends
 	EXTRN	slashp_erase:near	;AN000;
 	EXTRN	std_printf:near
 	EXTRN	tcommand:near
+IFDEF VER_RELAXED			;lpproj;
+	EXTRN	IsDOS4:near		;lpproj;
+ENDIF					;lpproj;
 
 	PUBLIC	badpath_err		;AN022;
 	PUBLIC	crename
@@ -380,12 +383,17 @@ gottarg:
 	mov	dx,offset trangroup:inornot_ptr ; Yes, report error
 	jmp	Cerror
 nowilds:
+IFDEF VER_RELAXED				;lpproj;
+	mov	ax,(OPEN SHL 8) OR ((read_open_mode) AND 0FFH)	;lpproj;
+	mov	dx,offset trangroup:srcbuf	;lpproj;
+ELSE						;lpproj;
 	mov	ax,ExtOpen SHL 8		;AC000; open the file
 	mov	bx,read_open_mode		;AN000; get open mode for TYPE
 	xor	cx,cx				;AN000; no special files
 	mov	dx,read_open_flag		;AN000; set up open flags
 	mov	di,-1				;AN030; no parm list
 	mov	si,offset trangroup:srcbuf	;AN030; get file name
+ENDIF						;lpproj; (IFDEF VER_RELAXED)
 	int	int_command
 	jnc	typecont			; If open worked, continue. Otherwise load
 
@@ -572,6 +580,11 @@ PRINT_SERIAL:
 ; occurs, do not print volume serial number.
 ;
 
+IFDEF VER_RELAXED				;lpproj;
+	call	IsDOS4				;lpproj;
+	jb	printvol_end			;lpproj;
+ENDIF						;lpproj;
+
 	push	dx				;AN000; save message offset
 	mov	ax,(GetSetMediaID SHL 8)	;AC036; Get the volume serial info
 	mov	bl,DS:[FCB]			;AN000; get drive number from FCB
@@ -612,6 +625,11 @@ Set_file_code_page proc near			;AN000;
 	push	di				;AN000;
 	push	dx				;AN000;
 
+IFDEF VER_RELAXED				;lpproj;
+	call	IsDOS4				;lpproj;
+	jne	set_file_cp_end			;lpproj;
+ENDIF						;lpproj;
+
 	cmp	cpyflag,1			;AN000; were we called from COPY?
 	jz	Already_have_cp 		;AN000; yes - already have code page
 	call	get_file_code_page_tag		;AN000; get the file's code page
@@ -630,6 +648,9 @@ cp_set_error:
 
 set_file_cp_end:				;AN000; finished
 	pop	dx				;AN000; restore registers
+IFDEF VER_RELAXED				;lpproj;
+	clc					;lpproj;
+ENDIF						;lpproj;
 
 set_file_cp_exit:
 	pop	di				;AN000;

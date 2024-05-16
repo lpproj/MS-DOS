@@ -135,6 +135,9 @@ TRANCODE	SEGMENT PUBLIC BYTE
 	EXTRN	CERROR:NEAR
 	EXTRN	COPERR:NEAR
 	EXTRN	TCOMMAND:NEAR
+IFDEF VER_RELAXED			;lpproj;
+	EXTRN	IsDOS4:NEAR		;lpproj;
+ENDIF					;lpproj;
 
 	PUBLIC	COPY
 
@@ -592,11 +595,16 @@ DOCOPY:
 
 	mov	[RDEOF],0			; No EOF yet
 
+IFDEF VER_RELAXED				;lpproj;
+	mov	ax,(OPEN SHL 8) OR ((read_open_mode) AND 0FFH)	;lpproj;
+	mov	dx,offset trangroup:srcbuf	;lpproj;
+ELSE						;lpproj;
 	MOV	AX,EXTOPEN SHL 8		;AC000; open the file
 	mov	bx,read_open_mode		;AN000; get open mode for COPY
 	xor	cx,cx				;AN000; no special files
 	mov	dx,read_open_flag		;AN000; set up open flags
 	mov	di,-1				;AN030; no parameter list
+ENDIF						;lpproj; (IFDEF VER_RELAXED)
 	INT	int_command
 
 	jnc	OpenOK
@@ -616,6 +624,10 @@ OpenOK:
 	mov	[CPTIME],cx			; Save TIME
 
 	mov	cx,xa_list_attr 		;AN000; get old code page in cx
+IFDEF VER_RELAXED				;lpproj;
+	call	IsDOS4				;lpproj;
+	jne	no_cp_get			;lpproj;
+ENDIF						;lpproj; (IFDEF VER_RELAXED)
 	push	cx				;AN000; save old attribute
 	mov	xa_list_attr,0			;AN000; initialize code page
 
@@ -679,6 +691,10 @@ get_src_xa:
 
 Alloc_for_xa_okay:
 
+IFDEF VER_RELAXED				;lpproj;
+	call	IsDOS4				;lpproj;
+	jne	no_copy_xa			;lpproj;
+ENDIF						;lpproj; (IFDEF VER_RELAXED)
 	mov	ax,(file_times SHL 8)+get_XA	;AN000; get extended attributes
 	push	es				;AN000; save es
 	mov	es,[src_xa_seg] 		;AN000; get segment for XA list
@@ -851,6 +867,10 @@ DODCLOSE:
 	INT	int_command			; Set date and time
 	jc	xa_cleanup_err			;AN022; handle error
 
+IFDEF VER_RELAXED				;lpproj;
+	call	IsDOS4				;lpproj;
+	jne	no_xa_cleanup_err		;lpproj;
+ENDIF						;lpproj; (IFDEF_VER_RELAXED)
 	mov	ax,(file_times SHL 8)+set_XA	;AN000; set code page
 	mov	di,offset trangroup:xa_cp_out	;AC030; offset of attr list
 	int	int_command			;AN000;

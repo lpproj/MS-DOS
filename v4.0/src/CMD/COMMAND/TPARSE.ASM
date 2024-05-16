@@ -5,6 +5,7 @@ TITLE	COMMAND interface to SYSPARSE
 
 .xlist
 .xcref
+	INCLUDE comsw.asm		;lpproj;
 	INCLUDE comseg.asm		;AN000;
 .list
 .cref

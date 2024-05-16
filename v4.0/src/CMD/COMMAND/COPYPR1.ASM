@@ -51,6 +51,9 @@ TRANSPACE	ENDS
 TRANCODE	SEGMENT PUBLIC BYTE
 
 	EXTRN	ENDCOPY:NEAR
+IFDEF VER_RELAXED			;lpproj;
+	EXTRN	IsDOS4:NEAR		;lpproj;
+ENDIF					;lpproj;
 
 	PUBLIC	FLSHFIL
 	PUBLIC	TRYFLUSH
@@ -94,6 +97,22 @@ NO_CONCAT_ERR:					;AC000;
 	MOV	[NOWRITE],1			; Flag not writting (just seeking)
 
 PROCDEST:
+IFDEF VER_RELAXED				;lpproj;
+	call	IsDOS4				;lpproj;
+	jae	cont_extop			;lpproj;
+	mov	ax,(OPEN SHL 8) OR ((write_open_mode) AND 0FFH)	;lpproj;
+	mov	dx,offset trangroup:destbuf	;lpproj;
+	cmp	[NOWRITE],0			;lpproj;
+	jnz	DODESTOPEN			;lpproj;
+	mov	ah,CREAT			;lpproj;
+	xor	cx,cx				;lpproj;
+	jmp	short DODESTOPEN		;lpproj;
+cont_extop:					;lpproj;
+	mov	dx,write_open_flag		;lpproj;
+	je	cont_extop_02			;lpproj;
+	mov	dh,0				;lpproj; clear unknown flag (for DOS5+)
+cont_extop_02:					;lpproj;
+ENDIF						;lpproj; (IFDEF VER_RELAXED)
 	MOV	AX,EXTOPEN SHL 8		;AC000; open the file
 	mov	si,offset trangroup:destbuf	;AN030; get file name
 	mov	di,-1				;AN030; indicate no parameters
@@ -107,7 +126,9 @@ PROCDEST:
 cont_no_xa:					;AN030;
 	mov	bx,write_open_mode		;AN000; get open mode for COPY
 	xor	cx,cx				;AN000; no special files
+IFNDEF VER_RELAXED				;lpproj;
 	mov	dx,write_open_flag		;AN000; set up open flags
+ENDIF						;lpproj; (IFNDEF VER_RELAXED)
 
 	CMP	[NOWRITE],0
 	JNZ	DODESTOPEN		; Don't actually create if NOWRITE set

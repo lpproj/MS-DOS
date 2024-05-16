@@ -1,0 +1,12 @@
+#
+COMMAND.COM
+command.com
+COMMAND.CTL
+command.ctl
+COMMAND.CL*
+command.cl*
+*.OBJ
+*.obj
+*.MAP
+*.map
+

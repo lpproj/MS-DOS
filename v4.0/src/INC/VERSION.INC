@@ -31,7 +31,7 @@ memS       EQU     1			; Small model
 ; --------------------------------------------------------
 ;  Clone Version |     TRUE              FALSE
 ;
-IBMVER     EQU     TRUE
+IBMVER     EQU     FALSE
 IBMCOPYRIGHT EQU   FALSE
 
 BUFFERFLAG	EQU	NOT IBMCOPYRIGHT
@@ -73,11 +73,11 @@ IBMJAPVER  EQU	   FALSE		;If TRUE set KANJI true also
 ;
 ; Switch INTERNAT for DBCS support
 ;
-INTERNAT   EQU	   FALSE
+INTERNAT   EQU	   TRUE
 ;
 	IF INTERNAT
 KANJI	   EQU	   TRUE
-IBMJAPAN   EQU	   TRUE
+IBMJAPAN   EQU	   IBMJAPVER
 	ELSE
 KANJI	   EQU	   FALSE
 IBMJAPAN   EQU	   FALSE
@@ -92,8 +92,8 @@ endif
 ; The default contry code is assumed as USA.
 ;
 	IF INTERNAT
- KOREA	   EQU	   TRUE
- JAPAN	   EQU	   FALSE
+ KOREA	   EQU	   FALSE
+ JAPAN	   EQU	   TRUE
 	ELSE
  KOREA	   EQU	   FALSE
  JAPAN	   EQU	   FALSE
@@ -104,3 +104,4 @@ endif
 %OUT	Internat(ECS) version build switch on
 		ENDIF
 	ENDIF
+
