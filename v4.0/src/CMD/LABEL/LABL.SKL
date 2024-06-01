@@ -23,4 +23,3 @@
 :use 10 COMMON38                        ;CR,LF                          ;AN001;
 
 :end                                    ;END UTIL                       ;AN000;
-

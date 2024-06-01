@@ -86,9 +86,9 @@ SELECT	SEGMENT PARA PUBLIC 'SELECT'                            ;AN000;
 ;  All values are re-initialized the second time round only if the new option
 ;  is different from the previously selected option.
 ;
-; �����������������������������������������������������������������Ŀ
+; -----------------------------------------------------------------Ŀ
 ; �		 �  I_WORKSPACE=1 �  I_WORKSPACE=2 �  I_WORKSPACE=3 �
-; �����������������������������������������������������������������Ĵ
+; -----------------------------------------------------------------Ĵ
 ; � P_BREAK	 �  'ON'          �  'ON'          �  'ON'          �
 ; � P_BUFFERS	 �  ' '           �  '20'          �  '50,4'        �
 ; � P_CPSW	 �  'OFF'         �  'OFF'         �  'OFF'         �
@@ -121,7 +121,7 @@ SELECT	SEGMENT PARA PUBLIC 'SELECT'                            ;AN000;
 ; � DOS_LOC	 �  'DOS'         �  'DOS'         �  'DOS'         �
 ; � F_XMA	 �  yes 	  �  yes	   �  yes	    �
 ; � P_XMA2EMS	 �  'FRAME=D000 P254=C800 P255=CC00' for all options�
-; �������������������������������������������������������������������
+; -------------------------------------------------------------------
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 WORKSPACE_SCREEN:						;AN000;
 	INIT_PQUEUE		PAN_WORKSPACE			;AN000; initialize queue
