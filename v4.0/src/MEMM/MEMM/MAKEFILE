@@ -148,14 +148,15 @@ BUGLST = memm386.lst elimfunc.lst init.lst allocmem.lst ppage.lst emmmes.lst \
 #	MEMM targets
 #******************************************************************************
 #emm386: emm386.exe emm386.com emm386d.exe
-emm386: emm386.exe
+emm386: emm386.sys
 
 #	production version of EMM386 device driver
 #
 emm386.exe: $(MEMMOBJ) $(MEMMLIBS) emm386.lnk
 	$(LINK) $(LFLAGS) @emm386.lnk
-	del emm386.sys
-	ren emm386.exe emm386.sys
+
+emm386.sys: emm386.exe
+	copy /b emm386.exe emm386.sys
 
 #	EMM386.COM utility
 #
