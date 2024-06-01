@@ -11,7 +11,7 @@ hinc	=..\..\h
 
 all: xmaem.sys
 
-xmaem.ctl:     xmaem.skl $(msg)\$(COUNTRY).msg makefile
+xmaem.cl1:     xmaem.skl $(msg)\$(COUNTRY).msg makefile
 		nosrvbld xmaem.skl $(msg)\$(COUNTRY).msg
 
 INDEINI.obj:   INDEINI.ASM
@@ -30,12 +30,12 @@ INDEGDT.obj:   INDEGDT.ASM
 
 INDEI15.obj:   INDEI15.ASM
 
-INDEmsg.obj:   INDEmsg.ASM xmaem.ctl
+INDEmsg.obj:   INDEmsg.ASM xmaem.cl1
 
 INDEpat.obj:   INDEpat.ASM
 
 xmaem.sys:  makefile			\
-	    xmaem.ctl			\
+	    xmaem.cl1			\
 	    INDEINI.obj 		\
 	    INDEEMU.obj 		\
 	    INDEEXC.obj 		\
