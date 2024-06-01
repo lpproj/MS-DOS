@@ -1,0 +1,7 @@
+#
+#USA.INF text working-tree-encoding=CP437 eol=crlf
+#usa.inf text working-tree-encoding=CP437 eol=crlf
+*.PRT text eol=crlf
+*.prt text eol=crlf
+*.TXT text eol=crlf
+*.txt text eol=crlf

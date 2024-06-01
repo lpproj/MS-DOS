@@ -1,0 +1,3 @@
+#
+*.MSG text eol=crlf
+*.msg text eol=crlf

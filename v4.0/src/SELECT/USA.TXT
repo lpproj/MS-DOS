@@ -1182,4 +1182,3 @@ Select this option if you do not want the MS-DOS
 Shell to be installed by SELECT onto the target 
 system.@
 .HELPTEND.
-

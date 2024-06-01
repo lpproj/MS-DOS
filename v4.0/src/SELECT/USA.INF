@@ -1276,20 +1276,26 @@ PANEL35_L	EQU	($-PANEL35)/PANEL35_W		     ;AN028;
 ;	      |---------1---------2---------3---------4---------5----|
 
 PANEL36  LABEL	 BYTE					      ;AN000;
-	DB   '������������������������������������������������������Ŀ';AN000;
+	db 0DAh
+	db 54 dup (0C4h)
+	db 0BFh
 PANEL36_W	EQU	($-PANEL36)			      ;AN000;
-	DB   '�                                                      �';AN000;
-	DB   '�                                                      �';AN000;
-	DB   '�                                                      �';AN000;
-	DB   '�                                                      �';AN000;
-	DB   '�                                                      �';AN000;
-	DB   '�                                                      �';AN000;
-	DB   '�                                                      �';AN000;
-	DB   '�                                                      �';AN000;
-	DB   '�                                                      �';AN000;
-	DB   '������������������������������������������������������Ĵ';AN000;
-	DB   '�                                                      �';AN000;
-	DB   '��������������������������������������������������������';AN000;
+	DB   0B3h,'                                                      ',0B3h;AN000;
+	DB   0B3h,'                                                      ',0B3h;AN000;
+	DB   0B3h,'                                                      ',0B3h;AN000;
+	DB   0B3h,'                                                      ',0B3h;AN000;
+	DB   0B3h,'                                                      ',0B3h;AN000;
+	DB   0B3h,'                                                      ',0B3h;AN000;
+	DB   0B3h,'                                                      ',0B3h;AN000;
+	DB   0B3h,'                                                      ',0B3h;AN000;
+	DB   0B3h,'                                                      ',0B3h;AN000;
+	db 0C3h
+	db 54 dup (0C4h)
+	db 0B4h
+	DB   0B3h,'                                                      ',0B3h;AN000;
+	db 0C0h
+	db 54 dup (0C4h)
+	db 0D9h
 PANEL36_L	EQU	($-PANEL36)/PANEL36_W		      ;AN000;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1301,7 +1307,7 @@ PANEL36_L	EQU	($-PANEL36)/PANEL36_W		      ;AN000;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PANEL37  LABEL	 BYTE					      ;AN000;
-	DB '��������������������������������������������������������������������������������';AN000;
+	db 80 dup (0C4h)
 PANEL37_W	EQU	($-PANEL37)			      ;AN000;
 PANEL37_L	EQU	($-PANEL37)/PANEL37_W		      ;AN000;
 
@@ -1316,7 +1322,7 @@ PANEL37_L	EQU	($-PANEL37)/PANEL37_W		      ;AN000;
 ;     |---------1---------2---------3---------4---------5---------6---------7---------8
 
 PANEL38  LABEL	 BYTE					      ;AN000;
-	DB 'Press Enter (��) to continue or Esc to Cancel'   ;AN000;
+	DB 'Press Enter (',0C4h,0D9h,') to continue or Esc to Cancel'   ;AN000;
 PANEL38_W	EQU	($-PANEL38)			      ;AN000;
 PANEL38_L	EQU	($-PANEL38)/PANEL38_W		      ;AN000;
 
@@ -1774,16 +1780,22 @@ PANEL66_L	EQU	($-PANEL66)/PANEL66_W	   ;AN000;
 ;	      |---------1---------2---------3---------4---------5-|
 
 PANEL67 LABEL BYTE				;AN000;
-	DB   '���������������������������������������������������Ŀ';AN000;
+	db 0DAh
+	db 51 dup (0C4h)
+	db 0BFh
 PANEL67_W	EQU	($-PANEL67)		;AN000;
-	DB   '�                                                   �';AN000;
-	DB   '�                                                   �';AN000;
-	DB   '�                                                   �';AN000;
-	DB   '�                                                   �';AN000;
-	DB   '�                                                   �';AN000;
-	DB   '���������������������������������������������������Ĵ';AN000;
-	DB   '�                                                   �';AN000;
-	DB   '�����������������������������������������������������';AN000;
+	DB   0B3h,'                                                   ',0B3h;AN000;
+	DB   0B3h,'                                                   ',0B3h;AN000;
+	DB   0B3h,'                                                   ',0B3h;AN000;
+	DB   0B3h,'                                                   ',0B3h;AN000;
+	DB   0B3h,'                                                   ',0B3h;AN000;
+	db 0C3h
+	db 51 dup (0C4h)
+	db 0B4h
+	DB   0B3h,'                                                   ',0B3h;AN000;
+	db 0C0h
+	db 51 dup (0C4h)
+	db 0D9h
 PANEL67_L	EQU	($-PANEL67)/PANEL67_W	;AN000;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2378,4 +2390,4 @@ PANEL103_L	EQU	($-PANEL103)/PANEL103_W	    ;AN000;
 
 
 ENDIF
-
+

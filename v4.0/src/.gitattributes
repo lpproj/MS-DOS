@@ -1,0 +1,6 @@
+#
+*.BAT text eol=crlf
+*.bat text eol=crlf
+*.SKL text eol=crlf
+*.skl text eol=crlf
+
