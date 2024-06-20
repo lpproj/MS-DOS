@@ -45,20 +45,24 @@ TITLE	BIOS SYSTEM INITIALIZATION
 ;AN034; P5128 EMS INT 2FH HANDLER BUG				   06/24/88
 ;==============================================================================
 
-TRUE	    EQU 0FFFFh
-FALSE	    EQU 0
+.xlist
+	include version.inc
+.list
+
+;TRUE	    EQU 0FFFFh
+;FALSE	    EQU 0
 LF	equ	10
 CR	equ	13
 TAB	equ	 9
 SEMICOLON equ	';'
 
-IBMVER	   EQU	   TRUE
-IBM	   EQU	   IBMVER
+;IBMVER	   EQU	   TRUE
+;IBM	   EQU	   IBMVER
 STACKSW    EQU	   TRUE 		;Include Switchable Hardware Stacks
-IBMJAPVER  EQU	   FALSE		;If TRUE set KANJI true also
-MSVER	   EQU	   FALSE
-ALTVECT    EQU	   FALSE		;Switch to build ALTVECT version
-KANJI	   EQU	   FALSE
+;IBMJAPVER  EQU	   FALSE		;If TRUE set KANJI true also
+;MSVER	   EQU	   FALSE
+;ALTVECT    EQU	   FALSE		;Switch to build ALTVECT version
+;KANJI	   EQU	   FALSE
 
 HAVE_INSTALL_CMD      equ     00000001b ;AN018; CONFIG.SYS has INSTALL= commands
 HAS_INSTALLED	      equ     00000010b ;AN018; SYSINIT_BASE installed.
@@ -91,11 +95,15 @@ DOSSIZE EQU	0A000H
 	include BIOSTRUC.INC
 	include smifssym.inc	;AN000; Reduced version of IFSSYM.INC.
 	include DEVMARK.inc	;AN004;
-	include version.inc
+;	include version.inc
 .list
 
 	IF	NOT IBMJAPVER
 	EXTRN	RE_INIT:FAR
+	ENDIF
+
+	IF	NOEXEC
+	EXTRN	LDFIL:NEAR
 	ENDIF
 
 ;

@@ -40,19 +40,23 @@ TITLE	BIOS SYSTEM INITIALIZATION
 ;AN030; P4934 P4759 INT 2Fh handler number be changed to 1Bh	  05/20/88 J.K.
 ;==============================================================================
 
-TRUE	    EQU 0FFFFh
-FALSE	    EQU 0
+.xlist
+	include version.inc
+.list
+
+;TRUE	    EQU 0FFFFh
+;FALSE	    EQU 0
 CR	    equ 13
 LF	    equ 10
 TAB	    equ  9
 
-IBMVER	   EQU	   TRUE
-IBM	   EQU	   IBMVER
+;IBMVER	   EQU	   TRUE
+;IBM	   EQU	   IBMVER
 STACKSW    EQU	   TRUE 		;Include Switchable Hardware Stacks
-IBMJAPVER  EQU	   FALSE		;If TRUE set KANJI true also
-MSVER	   EQU	   FALSE
-ALTVECT    EQU	   FALSE		;Switch to build ALTVECT version
-KANJI	   EQU	   FALSE
+;IBMJAPVER  EQU	   FALSE		;If TRUE set KANJI true also
+;MSVER	   EQU	   FALSE
+;ALTVECT    EQU	   FALSE		;Switch to build ALTVECT version
+;KANJI	   EQU	   FALSE
 MYCDS_SIZE equ	   88			;J.K. Size of Curdir_List. If it is not
 					;the same, then will generate compile error.
 
@@ -77,7 +81,7 @@ DOSSIZE EQU	0A000H
 	include DEVMARK.inc		;AN005;
 	include cputype.inc
 
-	include version.inc
+;	include version.inc
 
 .list
 
@@ -89,6 +93,10 @@ DOSSIZE EQU	0A000H
 
 	IF	NOT IBMJAPVER
 	EXTRN	RE_INIT:FAR
+	ENDIF
+
+	IF	NOEXEC
+	EXTRN	LDFIL:NEAR
 	ENDIF
 
 ;---------------------------------------

@@ -45,7 +45,9 @@
 
 	INCLUDE SYSVER.INC
 
+	IFNDEF IBMJAPAN			;lpproj;
 IBMJAPAN EQU	FALSE
+	ENDIF				;lpproj;
 
 SETCNTC EQU	TRUE			; If this is FALSE, DEBUG will not set
 					; the Control C int vector
