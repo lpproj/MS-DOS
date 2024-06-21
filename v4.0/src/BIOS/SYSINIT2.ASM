@@ -28,19 +28,23 @@ TITLE	BIOS SYSTEM INITIALIZATION
 ;AN015; D526 Add /NC parameter when installing SHARE.EXE	   04/28/88 J.K.
 ;==============================================================================
 
-TRUE	    EQU 0FFFFh
-FALSE	    EQU 0
+.xlist
+	include version.inc
+.list
+
+;TRUE	    EQU 0FFFFh
+;FALSE	    EQU 0
 LF	equ	10
 CR	equ	13
 TAB	equ	 9
 
-IBMVER	   EQU	   TRUE
-IBM	   EQU	   IBMVER
+;IBMVER	   EQU	   TRUE
+;IBM	   EQU	   IBMVER
 STACKSW    EQU	   TRUE 		;Include Switchable Hardware Stacks
-IBMJAPVER  EQU	   FALSE		;If TRUE set KANJI true also
-MSVER	   EQU	   FALSE
-ALTVECT    EQU	   FALSE		;Switch to build ALTVECT version
-KANJI	   EQU	   FALSE
+;IBMJAPVER  EQU	   FALSE		;If TRUE set KANJI true also
+;MSVER	   EQU	   FALSE
+;ALTVECT    EQU	   FALSE		;Switch to build ALTVECT version
+;KANJI	   EQU	   FALSE
 
 	IF	IBMJAPVER
 NOEXEC	EQU	TRUE
@@ -1328,6 +1332,7 @@ PRINT:	MOV	AH,STD_CON_STRING_OUTPUT
 ;
 ; LOAD NON EXE FILE CALLED [DS:DX] AT MEMORY LOCATION ES:BX
 ;
+	PUBLIC	LDFIL			;lpproj;
 LDFIL:
 	PUSH	AX
 	PUSH	BX

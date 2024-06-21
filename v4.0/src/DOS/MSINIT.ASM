@@ -531,7 +531,14 @@ OUTMES:
 	LODS	CS:BYTE PTR [SI]
 	CMP	AL,"$"
 	JZ	OUTDONE
+	IF TRUE					;lpproj;
+						;lpproj; import from print.asm
+	SaveReg <SI,DI,BP>
+	INT	29h
+	RestoreReg  <BP,DI,SI>
+	ELSE					;lpproj;
 	invoke	OUT
+	ENDIF					;lpproj;
 	JMP	SHORT OUTMES
 OUTDONE:
 	PUSH	CS			; OUT stomps on segments

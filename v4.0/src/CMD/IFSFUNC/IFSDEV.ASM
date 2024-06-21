@@ -360,7 +360,11 @@ PathSkip:										 ;AN000;
 	OR	AL,AL									 ;AN000;
 	JZ	FoundEnd								 ;AN000;
 IF Kanji										 ;AN000;
- kanji load of next char too								 ;AN000;
+ IF1											 ;lpproj; workaround for build break
+	%out IFSDEV.ASM...
+	%out ***** WARNING: KANJI enabled. It may need fix. (in IFS_DEVICE_CHECK) *****
+ ENDIF											 ;lpproj; workaround for build break
+; kanji load of next char too								 ;AN000; (;lpproj; commented out - workaround for build break)
 ENDIF											 ;AN000;
 	CallInstall PathChrCmp,multDOS,4,<AX>,<AX>					 ;AN000;
 	JZ	SaveSI									 ;AN000;

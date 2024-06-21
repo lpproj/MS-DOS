@@ -358,9 +358,9 @@ TABLE	ENDS
 
 Procedure   OEMFunctionKey,NEAR
 	ASSUME	DS:NOTHING,ES:NOTHING,SS:DOSGROUP
- IF  DBCS				;AN000;
-extrn	intCNE0:near			;AN000; 2/17/KK
-	CALL	intCNE0 		;AN000; 2/17/KK
+ IF  (DBCS AND (KOREA))			;AN000;lpproj;
+extrn	IntCNE0:near			;AN000; 2/17/KK
+	CALL	IntCNE0 		;AN000; 2/17/KK
  ELSE					;AN000;
 	invoke	$std_con_input_no_echo	; Get the second byte of the sequence
  ENDIF					;AN000;
