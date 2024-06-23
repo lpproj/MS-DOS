@@ -6,8 +6,9 @@ Title	COMMAND Language midifiable Code Transient
 
 .xlist
 .xcref
+	INCLUDE comsw.asm		;lpproj;
 	INCLUDE dossym.inc
-	INCLUDE comsw.asm
+;	INCLUDE comsw.asm
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
 .list

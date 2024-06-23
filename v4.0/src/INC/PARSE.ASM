@@ -32,6 +32,10 @@ endif					;AN000; endif		  (tm03)
 IF1					;AN000;
    %OUT INCLUDING COMP=COMMON DSN=PARSE.ASM...;AN000;
 ENDIF					;AN000;
+
+ifndef $CP_DEFAULT			;lpproj;
+   include codepage.sw			;lpproj;
+endif					;lpproj;
 ;***********************************************************************
 ; SysParse;
 ;
@@ -2917,7 +2921,7 @@ $P_Chk_DBCS PROC			;AN000;
 	PUSH	DI			;AN000;
 	PUSH	BP			;AN000;
 	PUSH	ES			;AN000;
-IF JAPAN				;lpproj; prepare fallback DBCS EV for Japanese DOS 3.x
+IF $CP_DEFAULT EQ 932			;lpproj; prepare fallback DBCS EV for Japanese DOS 3.x
 	MOV	SI,OFFSET cs: $P_DBCS_dummy_table	;lpproj;
 	PUSH	CS			;lpproj;
 	POP	DS			;lpproj;
@@ -2977,7 +2981,7 @@ $P_DBCS_EXIT:				;AN000;
 	POP	SI			;AN000;
 	POP	DS			;AN000;
 	RET				;AN000;
-IF JAPAN				;lpproj;
+IF $CP_DEFAULT EQ 932			;lpproj;
 $P_DBCS_dummy_table:			;lpproj;
 	DB	81H, 9FH, 0E0H, 0FCH	;lpproj;
 	DB	0, 0			;lpproj;

@@ -318,8 +318,9 @@ NAME	COMMAND
 
 .XCREF
 .XLIST
+	INCLUDE comsw.asm		;lpproj;
 	INCLUDE DOSSYM.INC
-	INCLUDE comsw.asm
+;	INCLUDE comsw.asm
 	INCLUDE comequ.asm
 	INCLUDE resmsg.equ		;AN000;
 .LIST

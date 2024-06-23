@@ -31,15 +31,21 @@ memS       EQU     1			; Small model
 ; --------------------------------------------------------
 ;  Clone Version |     TRUE              FALSE
 ;
-IBMVER     EQU     FALSE
+	ifndef IBMVER
+IBMVER     EQU     TRUE
+	endif
+	ifndef IBMCOPYRIGHT
 IBMCOPYRIGHT EQU   FALSE
+	endif
 
 BUFFERFLAG	EQU	NOT IBMCOPYRIGHT
 
-ifndef	MSVER	
+	ifndef	MSVER
 MSVER      EQU     NOT IBMVER
-endif
-IBM	   EQU	   IBMVER
+	endif
+	ifndef	IBM
+IBM	    EQU   IBMVER
+	endif
 ;
 ;
   IF1
@@ -68,16 +74,21 @@ IBM	   EQU	   IBMVER
 ;*                                                                         *
 ;***************************************************************************
 ;
+	ifndef IBMJAPVER
 IBMJAPVER  EQU	   FALSE		;If TRUE set KANJI true also
+					;lpproj; (may be TRUE only in Japanese IBM DOS 2.x and should be always FALSE in other DOSes)
+	endif
 
 ;
 ; Switch INTERNAT for DBCS support
 ;
+	ifndef INTERNAT
 INTERNAT   EQU	   TRUE
+	endif
 ;
 	IF INTERNAT
 KANJI	   EQU	   TRUE
-IBMJAPAN   EQU	   IBMJAPVER
+IBMJAPAN   EQU	   FALSE		;lpproj; symbol used in DEBUG to save/restore NMI handler for PARITY err (IBM Japan 5550?)
 	ELSE
 KANJI	   EQU	   FALSE
 IBMJAPAN   EQU	   FALSE
@@ -91,6 +102,10 @@ endif
 ; Country code switches
 ; The default contry code is assumed as USA.
 ;
+
+	ifndef KOREA
+	ifndef JAPAN
+
 	IF INTERNAT
  KOREA	   EQU	   FALSE
  JAPAN	   EQU	   TRUE
@@ -98,10 +113,12 @@ endif
  KOREA	   EQU	   FALSE
  JAPAN	   EQU	   FALSE
 	ENDIF
+
+	endif
+	endif
 ;
 	IF1
 		IF INTERNAT
 %OUT	Internat(ECS) version build switch on
 		ENDIF
 	ENDIF
-

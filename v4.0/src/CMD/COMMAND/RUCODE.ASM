@@ -6,13 +6,14 @@ TITLE	COMMAND Language modifiable Code Resident
 
 .xlist
 .xcref
+	INCLUDE comsw.asm		;lpproj;
 INCLUDE DOSSYM.INC			;AC000;
 include doscntry.inc			;AC000;
 DEBUG = 0				; NEED TO SET IT TO WHAT IT IS IN DOSSYM.INC
 
 
 	INCLUDE DEVSYM.INC
-	INCLUDE comsw.asm
+;	INCLUDE comsw.asm
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
 	include resmsg.equ		;AN000;

@@ -4,8 +4,9 @@
 .sall
 .xlist
 .xcref
+    include comsw.asm		;lpproj;
 INCLUDE DOSSYM.INC
-    include comsw.asm
+;    include comsw.asm
     include comseg.asm
     include comequ.asm
 .list

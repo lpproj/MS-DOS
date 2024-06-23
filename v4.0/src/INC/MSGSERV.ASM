@@ -173,7 +173,10 @@ $M_COUNTRY_INFO ENDS					     ;;AN000;;
 
     IFDEF VER_RELAXED						;lpproj;
       IF VER_RELAXED						;lpproj;
-        IF JAPAN						;lpproj;
+        IFNDEF $CP_DEFAULT					;lpproj;
+          INCLUDE codepage.sw					;lpproj;
+        ENDIF							;lpproj;
+        IF $CP_DEFAULT EQ 932					;lpproj;
         $M_DBCS_DUMMY    db		81H, 9FH, 0E0H, 0FCH, 0, 0	;lpproj;
         ELSE							;lpproj;
         $M_DBCS_DUMMY    db		0, 0				;lpproj;

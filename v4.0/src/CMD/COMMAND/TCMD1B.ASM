@@ -7,9 +7,10 @@ TITLE	PART4 COMMAND Transient routines.
 
 .xlist
 .xcref
+	INCLUDE comsw.asm		;lpproj;
 	INCLUDE DOSSYM.INC
 	INCLUDE comseg.asm
-	INCLUDE comsw.asm		;AC000;
+;	INCLUDE comsw.asm		;AC000;
 	INCLUDE comequ.asm
 	INCLUDE ioctl.inc		;AN000;
 	INCLUDE ea.inc			;AN030;
