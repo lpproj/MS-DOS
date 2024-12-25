@@ -613,8 +613,21 @@ eswitchok:
 	mov	di,offset resgroup:comnd1_addr	;AN000; get number returned
 	mov	bx,word ptr [di]		;AN000;     into bx
 
+IFDEF VER_RELAXED				;lpproj;
+	mov	cl,4				;lpproj;
+	cmp	bx,ENVSML			;lpproj; treat small value (10..62) as paragraphs
+	jae	_eswitch_l02			;lpproj; (to support undocumented feature on DOS 3.1)
+	cmp	bx,63				;lpproj; (fallback: 63..159 to the default value 160)
+	jb	_eswitch_l01			;lpproj;
+	mov	bx,(ENVSML + 15) / 16		;lpproj;
+_eswitch_l01:					;lpproj;
+	shl	bx,cl				;lpproj;
+_eswitch_l02:					;lpproj;
+	add	bx,0Fh				;lpproj;
+ELSE						;lpproj;
 	ADD	BX, 0FH 			; Round up to next paragraph
 	mov	cl,4				;AC000; convert to pargraphs
+ENDIF						;lpproj;
 	SHR	BX, cl				;AC000;   by right 4
 
 	MOV	EnvSiz,BX			; EnvSiz is in paragraphs

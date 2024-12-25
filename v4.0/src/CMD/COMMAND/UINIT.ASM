@@ -218,7 +218,11 @@ COMMAND_E_VAL	LABEL	BYTE			;AN000;
 		DB	1			;AN000;
 		DB	1			;AN000; 1 range
 		DB	1			;AN000; returned if result
+IFDEF VER_RELAXED				;lpproj;
+		DD	10,ENVBIG		;lpproj; treat small value (10..62) as paragraphs
+ELSE						;lpproj;
 		DD	ENVSML,ENVBIG		;AN000; minimum & maximum value
+ENDIF						;lpproj;
 		DB	0			;AN000; no numeric values
 		DB	0			;AN000; no string values
 
