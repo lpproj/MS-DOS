@@ -3,6 +3,8 @@
 	include version.inc
 	page	80,132
 
+VER_RELAXED		EQU	TRUE	;lpproj;
+
 false	= 0
 
 DATA	SEGMENT PARA PUBLIC
@@ -503,13 +505,21 @@ $$IF3:
        xchg al,ah			;				       ;AN019;
        cmp  ax,(major_version shl 8) + minor_version ;			       ;AN019;
 ;      $if  ne				;				       ;AN019;
+IFDEF VER_RELAXED							       ;lpproj;
+       JAE $$IF5							       ;lpproj;
+ELSE									       ;lpproj;
        JE $$IF5
+ENDIF									       ;lpproj;
 	   mov	DOS_VER,0ffh		; keep track that DOS is down a level  ;AN019;
 					;    0 = current (default)
 ;      $endif				;   ff = down one level 	       ;AN021;
 $$IF5:
 ;      $if  be,and			;				       ;AN019;
+IFDEF VER_RELAXED							       ;lpproj;
+       ; (nothing to do)						       ;lpproj;
+ELSE									       ;lpproj;
        JNBE $$IF7
+ENDIF									       ;lpproj;
        cmp  ax,DOS_low			;				       ;AC023;
 ;      $if  ae				;				       ;AN019;
        JNAE $$IF7
