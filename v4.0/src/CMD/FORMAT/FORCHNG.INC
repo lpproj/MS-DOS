@@ -131,5 +131,7 @@
 ;*****************************************************************************
 ;* Note: This is file FORCHNG.INC for updating purposes                      *
 ;*****************************************************************************
+VER_RELAXED	EQU	(NOT 0)		;lpproj;
+VER_RELAXED_MIN	EQU	031Fh		;lpproj; DOS 3.31 as minimum requirement
 .list
 

@@ -279,6 +279,7 @@ data	ends
 
 debug	equ	0
 	.xlist
+	INCLUDE FORCHNG.INC		;lpproj; workaround for VER_RELAXED
 	INCLUDE VERSIONA.INC
 	INCLUDE DOSMAC.INC
 	INCLUDE SYSCALL.INC

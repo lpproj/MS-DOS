@@ -656,6 +656,11 @@ Procedure Check_DBCS_Character			;				;AN000;
 	push	ax				;Save input character		;AN000;
 ;	$IF	NE				;Nope				;AN000;
 	JE $$IF43
+IFDEF VER_RELAXED				;lpproj;
+	   mov	   si, offset CS: $dbcs_vector_dummy	;lpproj;
+	   push	   cs				;lpproj;
+	   pop	   ds				;lpproj;
+ENDIF						;lpproj;
 	   mov	   al,0 			;Get DBCS environment vectors	;AN000;
 	   DOS_Call Hongeul			;  "  "    "  " 		;AN000;
 	   mov	   byte ptr es:DBCS_VECTOR,YES	;Indicate we've got vector      ;AN000;
@@ -695,6 +700,9 @@ $$SR45:
 	pop	ds				;Restore data segment		;AN000;
 	ret					;				;AN000;
 
+IFDEF VER_RELAXED				;lpproj;
+$dbcs_vector_dummy	db	0, 0		;lpproj;
+ENDIF						;lpproj;
 Check_DBCS_Character endp			;				;AN000;
 
 ;=========================================================================
