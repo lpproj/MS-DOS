@@ -802,7 +802,11 @@ $M_VERSION_CHECK PROC NEAR				     ;;AN000;;
 	IFDEF VER_RELAXED				     ;lpproj;
 	  IF VER_RELAXED				     ;lpproj;
 	  XCHG	  AL, AH				     ;lpproj;
-	  CMP	  AX, 030AH				     ;lpproj; allow DOS 3.1+ ifdef VER_RELAXED
+	  IFDEF VER_RELAXED_MIN
+	    CMP	  AX, VER_RELAXED_MIN			     ;lpproj;
+	  ELSE
+	    CMP	  AX, 030Ah				     ;lpproj; allow DOS 3.1+ ifdef VER_RELAXED
+	  ENDIF
 	  XCHG	  AL, AH				     ;lpproj;
 	  JB $MIF25					     ;lpproj;
 	  ELSE						     ;lpproj;
