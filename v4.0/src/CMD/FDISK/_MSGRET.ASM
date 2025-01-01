@@ -15,6 +15,7 @@ title	       C to Message Retriever
 ;
 ;-------------------------------------------------------------------
 
+VER_RELAXED	EQU	(NOT 0)		;lpproj;
 	INCLUDE SYSMSG.INC		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION ;AC010;
 
 	MSG_UTILNAME <FDISK>		;IDENTIFY THE COMPONENT 		;AC010;
