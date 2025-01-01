@@ -171,19 +171,6 @@ $M_COUNTRY_INFO ENDS					     ;;AN000;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 							     ;;
 
-    IFDEF VER_RELAXED						;lpproj;
-      IF VER_RELAXED						;lpproj;
-        IFNDEF $CP_DEFAULT					;lpproj;
-          INCLUDE codepage.sw					;lpproj;
-        ENDIF							;lpproj;
-        IF $CP_DEFAULT EQ 932					;lpproj;
-        $M_DBCS_DUMMY    db		81H, 9FH, 0E0H, 0FCH, 0, 0	;lpproj;
-        ELSE							;lpproj;
-        $M_DBCS_DUMMY    db		0, 0				;lpproj;
-        ENDIF							;lpproj; (JAPAN)
-      ENDIF							;lpproj; (VER_RELAXED)
-    ENDIF							;lpproj; (IFDEF VER_RELAXED)
-
 ELSE							     ;;AN000;;	ELSE if we have already included the STRUCTURES
 ; 
 ;   $SALUT  $M	(2,5,13,62)				     ;;AN000;;	Set SALUT formatting for code section
@@ -254,6 +241,28 @@ READ_DISK_PROC PROC FAR 				     ;;AN003;;
 	PUSH	DS					     ;;AN003;;
 	PUSH	DI					     ;;AN003;;
 	MOV	BP,AX					     ;;AN003;; Save message number
+IFDEF VER_RELAXED					     ;lpproj;
+	PUSH	ES					     ;lpproj;
+	XOR	AX,AX					     ;lpproj;
+	MOV	ES,AX					     ;lpproj;
+	CLI					     ;lpproj;
+	MOV	AX,WORD PTR ES: [24h * 4]		     ;lpproj;
+	MOV	WORD PTR CS: [$orgvect_24h],AX		     ;lpproj;
+	MOV	AX,WORD PTR ES: [24h * 4 + 2]		     ;lpproj;
+	MOV	WORD PTR CS: [$orgvect_24h + 2],AX	     ;lpproj;
+	MOV	WORD PTR ES: [24h * 4], OFFSET CS: $newentry_24h	     ;lpproj;
+	MOV	WORD PTR ES: [24h * 4 + 2], CS	     ;lpproj;
+	MOV	AX,3D00h				     ;lpproj; DOS_OPEN
+	MOV	DX,OFFSET RESGROUP:COMSPEC		     ;lpproj;
+	INT	21h					     ;lpproj;
+	CLI						     ;lpproj; (to be safe)
+	MOV	BX,WORD PTR CS: [$orgvect_24h]		     ;lpproj;
+	MOV	WORD PTR ES: [24h * 4],BX		     ;lpproj;
+	MOV	BX,WORD PTR CS: [$orgvect_24h + 2]	     ;lpproj;
+	MOV	WORD PTR ES: [24h * 4 + 2],BX		     ;lpproj;
+	STI						     ;lpproj;
+	POP	ES					     ;lpproj;
+ELSE							     ;lpproj;
 	MOV	AX,DOS_EXTENDED_OPEN			     ;;AN003;; Set INT 21 function
 	LEA	SI,RESGROUP:COMSPEC			     ;;AN003;; Get addressibilty to COMMAND.COM
 	PUSH	CS					     ;;AN003;;
@@ -263,6 +272,7 @@ READ_DISK_PROC PROC FAR 				     ;;AN003;;
 	MOV	DX,NOT_EX_FAIL_EX_OPEN			     ;;AN003;; Open Flag
 	INT	21H					     ;;AN003;; Open the file
 	POP	DI					     ;;AN003;; Retreive LSEEK pointer
+ENDIF							     ;lpproj; (VER_RELAXED)
 							     ;;AN003;; Error ?
 ;	$IF	NC,LONG 				     ;;AN003;;	No,
 	JNC $MXL1
@@ -368,6 +378,13 @@ $MIF1:
 	POP	AX					     ;;AN003;;
 							     ;;AN003;;	     abort everything
 	RET						     ;;AN003;;
+
+IFDEF VER_RELAXED					     ;lpproj;
+$orgvect_24h	DD	?				     ;lpproj;
+$newentry_24h:						     ;lpproj;
+	MOV	AL,3					     ;lpproj; fail
+	IRET						     ;lpproj;
+ENDIF							     ;lpproj;
 
 READ_DISK_PROC ENDP					     ;;AN003;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -639,6 +656,17 @@ $MEN20:
 ;;  Regs Changed:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+IFDEF VER_RELAXED					     ;lpproj;
+  IF VER_RELAXED					     ;lpproj;
+    IFNDEF $CP_DEFAULT					     ;lpproj;
+      INCLUDE codepage.sw				     ;lpproj;
+    ENDIF						     ;lpproj;
+  ENDIF							     ;lpproj; (VER_RELAXED)
+ENDIF							     ;lpproj; (IFDEF VER_RELAXED)
+IFNDEF $CP_DEFAULT					     ;lpproj;
+$CP_DEFAULT = 437					     ;lpproj;
+ENDIF							     ;lpproj;
+
 							     ;;
 $M_GET_DBCS_VEC PROC NEAR				     ;;AN000;;
 							     ;;
@@ -646,7 +674,9 @@ $M_GET_DBCS_VEC PROC NEAR				     ;;AN000;;
 	PUSH	SI					     ;;AN000;;
 	PUSH	DS					     ;;AN000;;
 IFDEF VER_RELAXED					     ;lpproj;
-	MOV	SI,OFFSET DS: $M_DBCS_DUMMY		     ;lpproj;
+	MOV	SI,OFFSET CS: $M_DBCS_DUMMY		     ;lpproj;
+	PUSH	CS					     ;lpproj;
+	POP	DS					     ;lpproj;
 ENDIF							     ;lpproj;
 	MOV	AX,DOS_GET_DBCS_INFO			     ;;AN000;; DOS function to get DBSC environment
 	INT	21H					     ;;AN000;; Get environment pointer
@@ -663,6 +693,14 @@ $MIF23:
 	POP	AX					     ;;AN000;; Retrieve character to check
 	RET						     ;;AN000;; Return
 							     ;;
+IFDEF VER_RELAXED
+	IF $CP_DEFAULT EQ 932				     ;lpproj; (if JAPAN)
+$M_DBCS_DUMMY    db	81H, 9FH, 0E0H, 0FCH, 0, 0	     ;lpproj;
+	ELSE						     ;lpproj;
+$M_DBCS_DUMMY    db	0, 0				     ;lpproj;
+	ENDIF						     ;lpproj; (JAPAN)
+ENDIF							     ;lpproj; (IFDEF VER_RELAXED)
+
 $M_GET_DBCS_VEC ENDP					     ;;
 							     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3184,8 +3222,8 @@ $M_IS_DOS4 proc near				;lpproj;
 	push	ax				;lpproj;
 	push	bx				;lpproj;
 	push	cx				;lpproj;
-	mov	AX,Get_Version SHL 8		;lpproj;
-	int	int_command			;lpproj;
+	mov	AX,3000h			;lpproj;
+	int	21h				;lpproj;
 	pop	cx				;lpproj;
 	pop	bx				;lpproj;
 	cmp	al,10				;lpproj;
