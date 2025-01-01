@@ -53,7 +53,10 @@ DATARES 	SEGMENT PUBLIC BYTE	;AC000;
 	EXTRN	critical_msg_start:byte ;AN000;
 	EXTRN	DATARESEND:BYTE 	;AC000;
 	EXTRN	dbcs_vector_addr:word	;AN000;
+IFDEF VER_RELAXED			;lpproj;
+	EXTRN	res_dbcs_jpdummy:BYTE	;lpproj;
 	EXTRN	res_dbcs_dummy:BYTE	;lpproj;
+ENDIF					;lpproj;
 	EXTRN	DEVE_OP_SEG:WORD	;AN000;
 	EXTRN	DEVE_OP_SEG2:WORD	;AN000;
 	EXTRN	disp_class:byte 	;AN000;
@@ -309,8 +312,25 @@ ENDIF						;lpproj;
 	mov	[initend],ax			;eg save this
 
 	push	ds				;AN000;
+IFDEF VER_RELAXED					;lpproj;
+	mov	bx,-1					;lpproj;
+	push	ds					;lpproj;
+	sub	sp, 34					;lpproj; alloc char cntrybuf[34]
+	mov	dx, sp					;lpproj; ds:dx = cntrybuf
+	push	ss					;lpproj;
+	pop	ds					;lpproj;
+	mov	ax,INTERNATIONAL shl 8			;lpproj;
+	int	int_command				;lpproj;
+	add	sp, 34					;lpproj; free cntrybuf
+	pop	ds					;lpproj;
+	mov	si, offset resgroup:res_dbcs_jpdummy	;lpproj; prepare fallback DBCS EV for DOS 3.x
+	cmp	bx, 81					;lpproj; is contry code JAPAN?
+	je	chk_leadtbl				;lpproj;
+	mov	si, offset resgroup:res_dbcs_dummy	;lpproj; fallback to non-DBCS
+chk_leadtbl:						;lpproj;
+ENDIF							;lpproj;
+
 	mov	ax, (ECS_call SHL 8) OR GetLeadBTbl ;AN000; get dbcs vector
-	mov	si, offset resgroup:res_dbcs_dummy	;lpproj; prepare fallback DBCS EV for DOS 3.x
 	int	int_command			;AN000;
 	mov	bx,ds				;AN000; get segment to bx
 	pop	ds				;AN000;
